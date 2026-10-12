@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import RegistroColaborador from "./pages/RegistroColaborador";
 import InicioAdmin from "./pages/InicioAdmin";
 import Admin from "./pages/Admin";
+import EditarServicio from "./pages/EditarServicio";
 
 function App() {
   return (
@@ -25,7 +26,12 @@ function App() {
         path="/agregar-servicio"
         element={<AgregarServicio />}
       />
-
+      
+      <Route
+        path="/editar-servicio/:id"
+        element={<EditarServicio />}
+      />
+      
       <Route
         path="/login"
         element={<Login />}
