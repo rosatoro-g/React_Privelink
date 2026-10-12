@@ -8,5 +8,22 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/test/setup.js",
+
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+
+      include: [
+        "src/components/**/*.{js,jsx}",
+        "src/data/**/*.{js,jsx}",
+        "src/pages/**/*.{js,jsx}",
+      ],
+
+      exclude: [
+        "src/test/**",
+        "src/assets/**",
+        "src/styles/**",
+      ],
+    },
   },
 });
