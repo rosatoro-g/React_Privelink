@@ -117,6 +117,12 @@ export function obtenerServiciosPorPerfil(perfilId) {
   );
 }
 
+export function obtenerServicioPorId(id) {
+  return obtenerServicios().find(
+    (servicio) => servicio.id === Number(id)
+  );
+}
+
 export function obtenerImagenServicio(nombreImagen) {
   return imagenes[nombreImagen] || servicioEvento;
 }

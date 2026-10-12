@@ -235,3 +235,28 @@
     width: 100%;
   }
 }
+
+.acciones-servicio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.boton-editar-servicio {
+  padding: 7px 10px;
+
+  border: 1px solid #304fa8;
+  border-radius: 8px;
+
+  background-color: #ffffff;
+  color: #304fa8;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+.boton-editar-servicio:hover {
+  background-color: #eef1fa;
+}

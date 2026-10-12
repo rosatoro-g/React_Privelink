@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   obtenerImagenServicio,
 } from "../data/Servicios";
@@ -39,17 +40,26 @@ function TarjetaServicio({
             </span>
           </div>
 
-          {onEliminar && (
-            <button
-              type="button"
-              className="boton-eliminar-servicio"
-              onClick={() =>
-                onEliminar(servicio.id)
-              }
+          <div className="acciones-servicio">
+            <Link
+              to={`/editar-servicio/${servicio.id}`}
+              className="boton-editar-servicio"
             >
-              Eliminar
-            </button>
-          )}
+              Editar
+            </Link>
+
+            {onEliminar && (
+              <button
+                type="button"
+                className="boton-eliminar-servicio"
+                onClick={() =>
+                  onEliminar(servicio.id)
+                }
+              >
+                Eliminar
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </article>
