@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
+
 import TarjetaServicio from "../components/TarjetaServicio";
 
 const servicioPrueba = {
@@ -21,10 +23,12 @@ describe("TarjetaServicio", () => {
     const eliminarMock = vi.fn();
 
     render(
-      <TarjetaServicio
-        servicio={servicioPrueba}
-        onEliminar={eliminarMock}
-      />
+      <MemoryRouter>
+        <TarjetaServicio
+          servicio={servicioPrueba}
+          onEliminar={eliminarMock}
+        />
+      </MemoryRouter>
     );
 
     const botonEliminar = screen.getByRole("button", {
