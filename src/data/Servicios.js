@@ -4,7 +4,17 @@ import servicioCine from "../assets/img/servicio-cine.jpg";
 import servicioConcierto from "../assets/img/servicio-concierto.jpg";
 import servicioBoda from "../assets/img/servicio-boda.jpg";
 
-const servicios = [
+const STORAGE_KEY = "privelink_servicios";
+
+const imagenes = {
+  evento: servicioEvento,
+  cena: servicioCena,
+  cine: servicioCine,
+  concierto: servicioConcierto,
+  boda: servicioBoda,
+};
+
+const serviciosIniciales = [
   {
     id: 1,
     perfilId: 1,
@@ -14,7 +24,7 @@ const servicios = [
       "Acompañamiento para eventos sociales, celebraciones y ocasiones especiales.",
     precio: 45000,
     ubicacion: "Valdivia",
-    imagen: servicioEvento,
+    imagen: "evento",
   },
   {
     id: 2,
@@ -25,7 +35,7 @@ const servicios = [
       "Una experiencia tranquila para compartir una cena y una buena conversación.",
     precio: 40000,
     ubicacion: "Valdivia",
-    imagen: servicioCena,
+    imagen: "cena",
   },
   {
     id: 3,
@@ -36,7 +46,7 @@ const servicios = [
       "Una salida relajada para disfrutar una película y compartir un buen momento.",
     precio: 35000,
     ubicacion: "Valdivia",
-    imagen: servicioCine,
+    imagen: "cine",
   },
   {
     id: 4,
@@ -47,7 +57,7 @@ const servicios = [
       "Acompañamiento para conciertos, presentaciones y eventos musicales.",
     precio: 50000,
     ubicacion: "Valdivia",
-    imagen: servicioConcierto,
+    imagen: "concierto",
   },
   {
     id: 5,
@@ -58,7 +68,7 @@ const servicios = [
       "Compañía para eventos sociales y actividades especiales.",
     precio: 40000,
     ubicacion: "Valdivia",
-    imagen: servicioEvento,
+    imagen: "evento",
   },
   {
     id: 6,
@@ -69,7 +79,7 @@ const servicios = [
       "Una experiencia para disfrutar gastronomía y buena conversación.",
     precio: 45000,
     ubicacion: "Temuco",
-    imagen: servicioCena,
+    imagen: "cena",
   },
   {
     id: 7,
@@ -80,8 +90,93 @@ const servicios = [
       "Acompañamiento para matrimonios, celebraciones y ocasiones especiales.",
     precio: 60000,
     ubicacion: "Temuco",
-    imagen: servicioBoda,
+    imagen: "boda",
   },
 ];
 
-export default servicios;
+function inicializarServicios() {
+  const guardados = localStorage.getItem(STORAGE_KEY);
+
+  if (!guardados) {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(serviciosIniciales)
+    );
+  }
+}
+
+export function obtenerServicios() {
+  inicializarServicios();
+
+  return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+}
+
+export function obtenerServiciosPorPerfil(perfilId) {
+  return obtenerServicios().filter(
+    (servicio) => servicio.perfilId === Number(perfilId)
+  );
+}
+
+export function obtenerImagenServicio(nombreImagen) {
+  return imagenes[nombreImagen] || servicioEvento;
+}
+
+export function crearServicio(nuevoServicio) {
+  const servicios = obtenerServicios();
+
+  const servicio = {
+    ...nuevoServicio,
+    id: Date.now(),
+    perfilId: Number(nuevoServicio.perfilId),
+    precio: Number(nuevoServicio.precio),
+  };
+
+  servicios.push(servicio);
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(servicios)
+  );
+
+  return servicio;
+}
+
+export function actualizarServicio(id, datosActualizados) {
+  const servicios = obtenerServicios();
+
+  const actualizados = servicios.map((servicio) =>
+    servicio.id === Number(id)
+      ? {
+          ...servicio,
+          ...datosActualizados,
+          precio: Number(
+            datosActualizados.precio ?? servicio.precio
+          ),
+        }
+      : servicio
+  );
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(actualizados)
+  );
+
+  return actualizados;
+}
+
+export function eliminarServicio(id) {
+  const servicios = obtenerServicios();
+
+  const actualizados = servicios.filter(
+    (servicio) => servicio.id !== Number(id)
+  );
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(actualizados)
+  );
+
+  return actualizados;
+}
+
+export default serviciosIniciales;
