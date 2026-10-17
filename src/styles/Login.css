@@ -1,0 +1,587 @@
+.login::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(216, 200, 165, 0.30), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(48, 79, 168, 0.25), transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(36, 59, 120, 0.25), transparent 30%);
+
+  filter: blur(30px);
+  animation: lucesFlotantes 14s ease-in-out infinite alternate;
+}
+
+.login-contenedor {
+  position: relative;
+  z-index: 1;
+
+  width: min(1250px, 100%);
+  min-height: 650px;
+
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+
+  box-shadow: 0 18px 45px rgba(36, 59, 120, 0.18);
+}
+
+.login {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 120px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 55px 24px;
+  overflow: hidden;
+
+  background: linear-gradient(
+    -45deg,
+    #f7f6f2,
+    #e8ecf8,
+    #d8c8a5,
+    #304fa8,
+    #243b78
+  );
+  background-size: 400% 400%;
+  animation: fondoPrivelink 18s ease infinite;
+}
+
+
+.login-contenedor {
+  width: min(1250px, 100%);
+  min-height: 650px;
+
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+
+  overflow: hidden;
+
+  border: 1px solid #e2e0db;
+  border-radius: 12px;
+
+  background: white;
+
+  box-shadow: 0 18px 45px rgba(36, 59, 120, 0.1);
+}
+
+/* =========================
+   CARRUSEL
+========================= */
+
+.login-carrusel {
+  position: relative;
+
+  min-height: 650px;
+
+  overflow: hidden;
+
+  background: #25262b;
+}
+
+.login-slide {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: opacity 0.7s ease;
+}
+
+.login-slide-activo {
+  opacity: 1;
+  visibility: visible;
+}
+
+.login-slide img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+}
+
+.login-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    180deg,
+    rgba(20, 27, 49, 0.12) 20%,
+    rgba(20, 27, 49, 0.72) 100%
+  );
+}
+
+.login-slide-texto {
+  position: absolute;
+
+  left: 55px;
+  right: 55px;
+  bottom: 70px;
+
+  z-index: 2;
+
+  color: white;
+}
+
+.login-slide-texto > p {
+  margin: 0 0 13px;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+
+  color: #d8c8a5;
+}
+
+.login-slide-texto h2 {
+  max-width: 580px;
+
+  margin: 0 0 14px;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1.08;
+  font-weight: 500;
+}
+
+.login-slide-texto span {
+  display: block;
+
+  max-width: 530px;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+
+  color: #f1f1f1;
+}
+
+/* =========================
+   CONTROLES CARRUSEL
+========================= */
+
+.login-carrusel-boton {
+  position: absolute;
+
+  top: 50%;
+  z-index: 4;
+
+  width: 42px;
+  height: 42px;
+
+  transform: translateY(-50%);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+
+  font-size: 1.7rem;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.login-carrusel-boton:hover {
+  background: rgba(181, 154, 99, 0.8);
+}
+
+.login-anterior {
+  left: 20px;
+}
+
+.login-siguiente {
+  right: 20px;
+}
+
+.login-indicadores {
+  position: absolute;
+
+  bottom: 26px;
+  left: 50%;
+
+  z-index: 4;
+
+  display: flex;
+  gap: 8px;
+
+  transform: translateX(-50%);
+}
+
+.login-indicador {
+  width: 9px;
+  height: 9px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.5);
+
+  cursor: pointer;
+}
+
+.login-indicador.activo {
+  width: 27px;
+
+  border-radius: 10px;
+
+  background: #d8c8a5;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+.login-panel {
+  display: flex;
+  align-items: center;
+
+  background: white;
+}
+
+.login-panel-contenido {
+  width: 100%;
+
+  padding: 50px 48px;
+}
+
+.login-etiqueta {
+  margin: 0 0 10px;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+
+  color: #b59a63;
+}
+
+.login-panel h2 {
+  margin: 0 0 10px;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.4rem;
+  font-weight: 500;
+
+  color: #243b78;
+}
+
+.login-subtitulo {
+  margin: 0 0 28px;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  line-height: 1.6;
+
+  color: #70727a;
+}
+
+/* =========================
+   ROLES
+========================= */
+
+.login-roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+
+  margin-bottom: 28px;
+}
+
+.login-roles button {
+  min-height: 80px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 10px 5px;
+
+  border: 1px solid #e2e0db;
+  border-radius: 6px;
+
+  background: #f9f9f8;
+
+  color: #5f6066;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.login-roles button span {
+  font-size: 1.25rem;
+}
+
+.login-roles button:hover {
+  border-color: #b59a63;
+}
+
+.login-roles button.rol-activo {
+  border: 2px solid #304fa8;
+
+  background: #eef1fa;
+
+  color: #304fa8;
+}
+
+/* =========================
+   FORMULARIO
+========================= */
+
+.login-formulario {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.login-campo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.login-campo label {
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+
+  color: #25262b;
+}
+
+.login-campo input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 13px 14px;
+
+  border: 1px solid #e2e0db;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #f9f9f8;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.95rem;
+
+  transition: 0.2s ease;
+}
+
+.login-campo input:focus {
+  border-color: #304fa8;
+
+  background: white;
+
+  box-shadow: 0 0 0 3px rgba(48, 79, 168, 0.08);
+}
+
+.login-error {
+  margin: -4px 0 0;
+
+  padding: 10px 12px;
+
+  border-radius: 5px;
+
+  background: #fff0f0;
+
+  color: #9d3838;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.88rem;
+}
+
+.login-boton {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: #304fa8;
+  color: white;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.login-boton:hover {
+  background: #243b78;
+}
+
+/* =========================
+   REGISTRO
+========================= */
+
+.login-separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin: 24px 0 18px;
+}
+
+.login-separador span {
+  flex: 1;
+
+  height: 1px;
+
+  background: #e2e0db;
+}
+
+.login-separador p {
+  margin: 0;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+
+  color: #9a9a9a;
+}
+
+.login-registro {
+  margin: 0 0 10px;
+
+  text-align: center;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 0.88rem;
+
+  color: #70727a;
+}
+
+.login-boton-registro {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #b59a63;
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #a2834b;
+
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.login-boton-registro:hover {
+  background: #b59a63;
+
+  color: white;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 950px) {
+  .login-contenedor {
+    grid-template-columns: 1fr;
+  }
+
+  .login-carrusel {
+    min-height: 430px;
+  }
+
+  .login-panel-contenido {
+    padding: 45px 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .login {
+    padding: 25px 15px;
+  }
+
+  .login-carrusel {
+    min-height: 380px;
+  }
+
+  .login-slide-texto {
+    left: 30px;
+    right: 30px;
+    bottom: 55px;
+  }
+
+  .login-panel-contenido {
+    padding: 38px 25px;
+  }
+
+  .login-roles {
+    grid-template-columns: 1fr;
+  }
+
+  .login-roles button {
+    min-height: 58px;
+
+    flex-direction: row;
+  }
+}
+
+
+
+@keyframes fondoPrivelink {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes lucesFlotantes {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -20px) scale(1.08);
+  }
+  100% {
+    transform: translate(-15px, 15px) scale(0.96);
+  }
+}
