@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logoPrivelink from "../assets/img/Privelink_logo.png";
+import logoPrivelink from "../assets/img/PriveLink_logo.png";
 import "../styles/Home.css";
 
 function Home() {
