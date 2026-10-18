@@ -9,6 +9,7 @@ import RegistroColaborador from "./pages/RegistroColaborador";
 import InicioAdmin from "./pages/InicioAdmin";
 import Admin from "./pages/Admin";
 import EditarServicio from "./pages/EditarServicio";
+import RegistroUsuario from "./pages/RegistroUsuario";
 
 function App() {
   return (
@@ -51,7 +52,14 @@ function App() {
         path="/admin"
         element={<Admin />}
       />
+
+      <Route
+        path="/registro-usuario"
+        element={<RegistroUsuario />}
+      />
     </Routes>
+
+    
   );
 }
 
