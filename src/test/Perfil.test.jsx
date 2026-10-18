@@ -14,21 +14,23 @@ function renderizarPerfil(ruta = "/perfil/1") {
 }
 
 describe("Perfil", () => {
-    test("renderiza correctamente el perfil de Sofía", () => {
+  test("renderiza correctamente el perfil de Sofía", () => {
     renderizarPerfil("/perfil/1");
 
     expect(
-        screen.getByText("Sofía, 25")
+      screen.getByRole("heading", {
+        name: /Sofía.*25/i,
+      })
     ).toBeInTheDocument();
 
     expect(
-        screen.getAllByText("📍 Valdivia").length
-    ).toBeGreaterThan(0);
+      screen.getByText("Valdivia")
+    ).toBeInTheDocument();
 
     expect(
-        screen.getByText("✓ Perfil verificado")
+      screen.getByText("✓ Verificado")
     ).toBeInTheDocument();
-    });
+  });
 
   test("muestra los servicios asociados al perfil", () => {
     renderizarPerfil("/perfil/1");
@@ -54,7 +56,7 @@ describe("Perfil", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("Volver al feed")
+      screen.getByText("Volver a explorar")
     ).toBeInTheDocument();
   });
 
@@ -65,19 +67,17 @@ describe("Perfil", () => {
 
     renderizarPerfil("/perfil/1");
 
-    const botonesEliminar =
-      screen.getAllByRole("button", {
-        name: "Eliminar",
-      });
+    const botonesEliminar = screen.getAllByRole("button", {
+      name: "Eliminar",
+    });
 
     const cantidadInicial = botonesEliminar.length;
 
     await user.click(botonesEliminar[0]);
 
-    const botonesRestantes =
-      screen.getAllByRole("button", {
-        name: "Eliminar",
-      });
+    const botonesRestantes = screen.getAllByRole("button", {
+      name: "Eliminar",
+    });
 
     expect(botonesRestantes.length).toBe(
       cantidadInicial - 1

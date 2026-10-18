@@ -24,11 +24,13 @@ function renderizarTarjeta() {
 }
 
 describe("TarjetaPerfil", () => {
-  test("renderiza correctamente el nombre del perfil", () => {
+  test("renderiza correctamente el nombre y edad del perfil", () => {
     renderizarTarjeta();
 
     expect(
-      screen.getByText("Sofía, 25")
+      screen.getByRole("heading", {
+        name: /Sofía.*25/i,
+      })
     ).toBeInTheDocument();
   });
 
@@ -36,7 +38,7 @@ describe("TarjetaPerfil", () => {
     renderizarTarjeta();
 
     expect(
-      screen.getByText("✓ Perfil verificado")
+      screen.getByText("✓ Verificado")
     ).toBeInTheDocument();
   });
 
@@ -44,7 +46,11 @@ describe("TarjetaPerfil", () => {
     renderizarTarjeta();
 
     expect(
-      screen.getByText("Desde $40.000")
+      screen.getByText("Desde")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("$40.000")
     ).toBeInTheDocument();
   });
 });
