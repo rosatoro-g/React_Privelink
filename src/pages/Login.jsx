@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLogin } from "../data/Login.js";
 
 import bannerChicas from "../assets/img/banner1.jpg";
 import bannerChica2 from "../assets/img/banner2.jpg";
@@ -12,10 +13,16 @@ function Login() {
 
   const [indiceActual, setIndiceActual] = useState(0);
 
-  const [rol, setRol] = useState("cliente");
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState("");
+  const {
+        rol,
+        setRol,
+        correo,
+        setCorreo,
+        contrasena,
+        setContrasena,
+        error,
+        manejarLogin,
+      } = useLogin();
 
   const banners = [
     {
@@ -58,29 +65,6 @@ function Login() {
     setIndiceActual((indice) =>
       indice === banners.length - 1 ? 0 : indice + 1
     );
-  };
-
-  const iniciarSesion = (evento) => {
-    evento.preventDefault();
-
-    if (!correo.trim() || !contrasena.trim()) {
-      setError("Debes completar el correo y la contraseña.");
-      return;
-    }
-
-    setError("");
-
-    if (rol === "administrador") {
-      navigate("/inicio-admin");
-      return;
-    }
-
-    if (rol === "colaborador") {
-      navigate("/perfil/1");
-      return;
-    }
-
-    navigate("/feed");
   };
 
   return (
@@ -180,7 +164,7 @@ function Login() {
               </button>
             </div>
 
-            <form className="login-formulario" onSubmit={iniciarSesion}>
+            <form className="login-formulario" onSubmit={manejarLogin}>
               <div className="login-campo">
                 <label htmlFor="correo">Correo electrónico</label>
 

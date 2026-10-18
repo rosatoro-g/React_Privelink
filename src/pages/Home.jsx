@@ -30,7 +30,7 @@ function Home() {
               Iniciar sesión
             </Link>
 
-            <Link to="/feed" className="home-boton-secundario">
+            <Link to="/registro-usuario" className="home-boton-secundario">
               Registrarse
             </Link>
           </div>

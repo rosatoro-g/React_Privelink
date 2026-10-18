@@ -5,7 +5,8 @@ function Header() {
   const location = useLocation();
 
   // Mostrar el botón solamente en Login
-  const esLogin = location.pathname === "/login";
+  const mostrarVolver = location.pathname === "/login" ||
+                  location.pathname === "/registro-usuario";
 
   return (
     <header className="header-principal">
@@ -14,12 +15,13 @@ function Header() {
         <div className="header-izquierda">
           <h1 className="header-logo">PrivéLink</h1>
 
-          {esLogin && (
-            <Link to="/" className="header-volver">
-              <span aria-hidden="true">←</span>
-              Volver al inicio
-            </Link>
+          {mostrarVolver && (
+           <Link to="/" className="header-volver">
+           <span aria-hidden="true">←</span>
+               Volver al inicio
+           </Link>
           )}
+          
         </div>
 
         <p className="header-frase">
