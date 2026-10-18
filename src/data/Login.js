@@ -1,8 +1,9 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// =========================================================
 // CUENTAS DE PRUEBA
+// =========================================================
 // Estos datos son públicos dentro del frontend.
 // Nunca utilizar contraseñas reales aquí.
 
@@ -18,6 +19,9 @@ const cuentasDemo = [
     correo: "colaborador@privelink.cl",
     clave: "Colab123",
     rol: "colaborador",
+
+    // Perfil que pertenece a esta colaboradora
+    perfilId: 1,
   },
   {
     id: 3,
@@ -27,11 +31,18 @@ const cuentasDemo = [
   },
 ];
 
+// =========================================================
+// RUTAS SEGÚN ROL
+// =========================================================
+
 const rutasPorRol = {
   administrador: "/inicio-admin",
-  colaborador: "/perfil/1",
   cliente: "/feed",
 };
+
+// =========================================================
+// HOOK LOGIN
+// =========================================================
 
 export function useLogin() {
   const navigate = useNavigate();
@@ -43,55 +54,91 @@ export function useLogin() {
 
   const manejarLogin = (evento) => {
     evento.preventDefault();
+
     setError("");
 
-    const correoNormalizado = correo.trim().toLowerCase();
+    const correoNormalizado =
+      correo.trim().toLowerCase();
 
-    // Verificar campos
+    // =====================================================
+    // VALIDAR CAMPOS
+    // =====================================================
+
     if (!correoNormalizado || !contrasena) {
-      setError("Ingresa tu correo y contraseña.");
+      setError(
+        "Ingresa tu correo y contraseña."
+      );
+
       return;
     }
 
-   
-    
-    // Cuentas registradas desde el formulario
+    // =====================================================
+    // USUARIOS REGISTRADOS
+    // =====================================================
+
     const usuariosGuardados = JSON.parse(
-      localStorage.getItem("privelink_usuarios") || "[]"
+      localStorage.getItem(
+        "privelink_usuarios"
+      ) || "[]"
     );
 
-    // Unir las cuentas de prueba con los clientes registrados
+    // Cuentas demo + usuarios registrados
+
     const todasLasCuentas = [
       ...cuentasDemo,
       ...usuariosGuardados,
     ];
 
-    // Buscar la cuenta y comprobar su contraseña
+    // =====================================================
+    // BUSCAR USUARIO
+    // =====================================================
+
     const usuario = todasLasCuentas.find(
       (cuenta) =>
-        cuenta.correo === correoNormalizado &&
+        cuenta.correo?.toLowerCase() ===
+          correoNormalizado &&
         cuenta.clave === contrasena
     );
 
-
     if (!usuario) {
-      setError("Correo o contraseña incorrectos.");
+      setError(
+        "Correo o contraseña incorrectos."
+      );
+
       return;
     }
 
+    // =====================================================
+    // COMPROBAR ROL SELECCIONADO
+    // =====================================================
 
     if (usuario.rol !== rol) {
       setError(
         "Esta cuenta no corresponde al tipo de usuario seleccionado."
       );
+
       return;
     }
 
-    // Guardar solo datos de sesión, no la contraseña
+    // =====================================================
+    // PERFIL DE LA COLABORADORA
+    // =====================================================
+
+    const perfilId =
+      usuario.rol === "colaborador"
+        ? usuario.perfilId || 1
+        : null;
+
+    // =====================================================
+    // GUARDAR SESIÓN
+    // =====================================================
+    // Nunca guardamos la contraseña.
+
     const sesion = {
       id: usuario.id,
       correo: usuario.correo,
       rol: usuario.rol,
+      perfilId,
     };
 
     localStorage.setItem(
@@ -99,15 +146,76 @@ export function useLogin() {
       JSON.stringify(sesion)
     );
 
-    // Redirigir según el rol
-    navigate(rutasPorRol[usuario.rol], {
-      replace: true,
-    });
+    /*
+     * Estas claves permiten que Perfil.jsx
+     * y Navbar.jsx sepan qué permisos mostrar.
+     */
+
+    localStorage.setItem(
+      "rol_usuario",
+      usuario.rol
+    );
+
+    if (
+      usuario.rol === "colaborador" &&
+      perfilId
+    ) {
+      localStorage.setItem(
+        "perfil_usuario_id",
+        String(perfilId)
+      );
+    } else {
+      localStorage.removeItem(
+        "perfil_usuario_id"
+      );
+    }
+
+    // =====================================================
+    // REDIRECCIÓN
+    // =====================================================
+
+    if (usuario.rol === "colaborador") {
+      navigate(
+        `/perfil/${perfilId}`,
+        {
+          replace: true,
+        }
+      );
+
+      return;
+    }
+
+    navigate(
+      rutasPorRol[usuario.rol],
+      {
+        replace: true,
+      }
+    );
   };
 
+  // =======================================================
+  // CERRAR SESIÓN
+  // =======================================================
+
   const cerrarSesion = () => {
-    localStorage.removeItem("privelink_sesion");
-    navigate("/login", { replace: true });
+    localStorage.removeItem(
+      "privelink_sesion"
+    );
+
+    localStorage.removeItem(
+      "rol_usuario"
+    );
+
+    localStorage.removeItem(
+      "perfil_usuario_id"
+    );
+
+    navigate(
+      "/login",
+      {
+        replace: true,
+      }
+    );
   };
 
   return {
