@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import perfiles from "../data/Perfiles";
+
 import TarjetaPerfil from "../components/TarjetaPerfil";
+
 import Navbar from "../components/Navbar";
 
 import "../styles/Feed.css";
@@ -10,8 +12,9 @@ function Feed() {
   const [busqueda, setBusqueda] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [servicio, setServicio] = useState("");
-  const [precioMaximo, setPrecioMaximo] = useState("");
+  const [rangoPrecio, setRangoPrecio] = useState("");
   const [disponibilidad, setDisponibilidad] = useState("");
+  const [precioAbierto, setPrecioAbierto] = useState(false);
 
   const perfilesFiltrados = perfiles.filter((perfil) => {
     const coincideBusqueda =
@@ -24,8 +27,27 @@ function Feed() {
     const coincideServicio =
       servicio === "" || perfil.servicios.includes(servicio);
 
-    const coincidePrecio =
-      precioMaximo === "" || perfil.precio <= Number(precioMaximo);
+    let coincidePrecio = true;
+
+    if (rangoPrecio === "hasta-40000") {
+      coincidePrecio = perfil.precio <= 40000;
+    }
+
+    if (rangoPrecio === "40001-45000") {
+      coincidePrecio =
+        perfil.precio > 40000 &&
+        perfil.precio <= 45000;
+    }
+
+    if (rangoPrecio === "45001-60000") {
+      coincidePrecio =
+        perfil.precio > 45000 &&
+        perfil.precio <= 60000;
+    }
+
+    if (rangoPrecio === "mas-60000") {
+      coincidePrecio = perfil.precio > 60000;
+    }
 
     const coincideDisponibilidad =
       disponibilidad === "" ||
@@ -44,8 +66,33 @@ function Feed() {
     setBusqueda("");
     setUbicacion("");
     setServicio("");
-    setPrecioMaximo("");
+    setRangoPrecio("");
     setDisponibilidad("");
+    setPrecioAbierto(false);
+  };
+
+  const seleccionarPrecio = (valor) => {
+    setRangoPrecio(valor);
+    setPrecioAbierto(false);
+  };
+
+  const obtenerTextoPrecio = () => {
+    switch (rangoPrecio) {
+      case "hasta-40000":
+        return "Hasta $40.000";
+
+      case "40001-45000":
+        return "$40.001 a $45.000";
+
+      case "45001-60000":
+        return "$45.001 a $60.000";
+
+      case "mas-60000":
+        return "Más de $60.000";
+
+      default:
+        return "Todos los precios";
+    }
   };
 
   return (
@@ -105,6 +152,7 @@ function Feed() {
               </div>
 
               <div className="row g-3">
+                {/* BUSCADOR */}
                 <div className="col-12">
                   <label
                     htmlFor="busqueda"
@@ -125,6 +173,7 @@ function Feed() {
                   />
                 </div>
 
+                {/* UBICACIÓN */}
                 <div className="col-12 col-md-6 col-xl">
                   <label
                     htmlFor="ubicacion"
@@ -155,6 +204,7 @@ function Feed() {
                   </select>
                 </div>
 
+                {/* SERVICIO */}
                 <div className="col-12 col-md-6 col-xl">
                   <label
                     htmlFor="servicio"
@@ -197,40 +247,7 @@ function Feed() {
                   </select>
                 </div>
 
-                <div className="col-12 col-md-6 col-xl">
-                  <label
-                    htmlFor="precio"
-                    className="form-label feed-label"
-                  >
-                    Precio máximo
-                  </label>
-
-                  <select
-                    id="precio"
-                    className="form-select feed-control"
-                    value={precioMaximo}
-                    onChange={(evento) =>
-                      setPrecioMaximo(evento.target.value)
-                    }
-                  >
-                    <option value="">
-                      Cualquier precio
-                    </option>
-
-                    <option value="35000">
-                      Hasta $35.000
-                    </option>
-
-                    <option value="40000">
-                      Hasta $40.000
-                    </option>
-
-                    <option value="45000">
-                      Hasta $45.000
-                    </option>
-                  </select>
-                </div>
-
+                {/* DISPONIBILIDAD */}
                 <div className="col-12 col-md-6 col-xl">
                   <label
                     htmlFor="disponibilidad"
@@ -248,7 +265,7 @@ function Feed() {
                     }
                   >
                     <option value="">
-                      Cualquier disponibilidad
+                      Toda disponibilidad
                     </option>
 
                     <option value="Disponible hoy">
@@ -258,7 +275,132 @@ function Feed() {
                     <option value="Disponible esta semana">
                       Disponible esta semana
                     </option>
+
                   </select>
+                </div>
+
+                {/* PRECIO */}
+                <div className="col-12 col-md-6 col-xl">
+                  <span className="form-label feed-label">
+                    Precio
+                  </span>
+
+                  <div className="precio-dropdown">
+                    <button
+                      type="button"
+                      className={`precio-dropdown-boton ${
+                        precioAbierto
+                          ? "precio-dropdown-boton-abierto"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setPrecioAbierto(!precioAbierto)
+                      }
+                      aria-expanded={precioAbierto}
+                    >
+                      <span>{obtenerTextoPrecio()}</span>
+
+                      <span
+                        className={`precio-dropdown-flecha ${
+                          precioAbierto
+                            ? "precio-dropdown-flecha-abierta"
+                            : ""
+                        }`}
+                      >
+                        ▾
+                      </span>
+                    </button>
+
+                    {precioAbierto && (
+                      <div className="precio-dropdown-menu">
+                        <label className="precio-radio">
+                          <input
+                            type="radio"
+                            name="rango-precio"
+                            value=""
+                            checked={rangoPrecio === ""}
+                            onChange={() =>
+                              seleccionarPrecio("")
+                            }
+                          />
+
+                          <span>Todos los precios</span>
+                        </label>
+
+                        <label className="precio-radio">
+                          <input
+                            type="radio"
+                            name="rango-precio"
+                            value="hasta-40000"
+                            checked={
+                              rangoPrecio === "hasta-40000"
+                            }
+                            onChange={() =>
+                              seleccionarPrecio(
+                                "hasta-40000"
+                              )
+                            }
+                          />
+
+                          <span>Hasta $40.000</span>
+                        </label>
+
+                        <label className="precio-radio">
+                          <input
+                            type="radio"
+                            name="rango-precio"
+                            value="40001-45000"
+                            checked={
+                              rangoPrecio === "40001-45000"
+                            }
+                            onChange={() =>
+                              seleccionarPrecio(
+                                "40001-45000"
+                              )
+                            }
+                          />
+
+                          <span>$40.001 a $45.000</span>
+                        </label>
+
+                        <label className="precio-radio">
+                          <input
+                            type="radio"
+                            name="rango-precio"
+                            value="45001-60000"
+                            checked={
+                              rangoPrecio === "45001-60000"
+                            }
+                            onChange={() =>
+                              seleccionarPrecio(
+                                "45001-60000"
+                              )
+                            }
+                          />
+
+                          <span>$45.001 a $60.000</span>
+                        </label>
+
+                        <label className="precio-radio">
+                          <input
+                            type="radio"
+                            name="rango-precio"
+                            value="mas-60000"
+                            checked={
+                              rangoPrecio === "mas-60000"
+                            }
+                            onChange={() =>
+                              seleccionarPrecio(
+                                "mas-60000"
+                              )
+                            }
+                          />
+
+                          <span>Más de $60.000</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -300,7 +442,9 @@ function Feed() {
                     ✦
                   </span>
 
-                  <h3>No encontramos coincidencias</h3>
+                  <h3>
+                    No encontramos coincidencias
+                  </h3>
 
                   <p>
                     Prueba modificando alguno de los filtros
