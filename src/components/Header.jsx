@@ -1,13 +1,33 @@
 
+import { Link, useLocation } from "react-router-dom";
+
 function Header() {
+  const location = useLocation();
+
+  // Mostrar el botón solamente en Login
+  const mostrarVolver = location.pathname === "/login" ||
+                  location.pathname === "/registro-usuario";
+
   return (
     <header className="header-principal">
       <div className="header-contenido">
-        <h1 className="header-logo">PrivéLink</h1>
+
+        <div className="header-izquierda">
+          <h1 className="header-logo">PrivéLink</h1>
+
+          {mostrarVolver && (
+           <Link to="/" className="header-volver">
+           <span aria-hidden="true">←</span>
+               Volver al inicio
+           </Link>
+          )}
+          
+        </div>
 
         <p className="header-frase">
           Conecta, comparte y vive nuevas experiencias.
         </p>
+
       </div>
     </header>
   );

@@ -1,49 +1,74 @@
 import { Link } from "react-router-dom";
+
 import {
   obtenerImagenServicio,
 } from "../data/Servicios";
 
 function TarjetaServicio({
   servicio,
+  puedeEditar = false,
   onEliminar,
 }) {
   return (
-    <article className="servicio-card">
-      <img
-        src={obtenerImagenServicio(servicio.imagen)}
-        alt={servicio.nombre}
-        className="servicio-imagen"
-      />
+    <article className="card tarjeta-servicio h-100 border-0">
 
-      <div className="servicio-contenido">
-        <span className="servicio-categoria">
+      <div className="servicio-imagen-contenedor">
+        <img
+          src={obtenerImagenServicio(servicio.imagen)}
+          alt={servicio.nombre}
+          className="servicio-imagen"
+        />
+
+        <div className="servicio-imagen-overlay"></div>
+
+        <span className="servicio-tipo">
           {servicio.categoria}
         </span>
+      </div>
 
-        <h3>{servicio.nombre}</h3>
+      <div className="card-body servicio-contenido d-flex flex-column">
+
+        <h3 className="servicio-nombre">
+          {servicio.nombre}
+        </h3>
 
         <p className="servicio-descripcion">
           {servicio.descripcion}
         </p>
 
-        <div className="servicio-footer">
-          <div>
+        <div className="servicio-meta">
+
+          <div className="servicio-precio">
+            <span>
+              Precio
+            </span>
+
             <strong>
               $
               {servicio.precio.toLocaleString(
                 "es-CL"
               )}
             </strong>
-
-            <span>
-              📍 {servicio.ubicacion}
-            </span>
           </div>
 
-          <div className="acciones-servicio">
+          <div className="servicio-ubicacion">
+            <span>
+              Ubicación
+            </span>
+
+            <strong>
+              📍 {servicio.ubicacion}
+            </strong>
+          </div>
+
+        </div>
+
+        {puedeEditar && (
+          <div className="servicio-acciones mt-auto">
+
             <Link
               to={`/editar-servicio/${servicio.id}`}
-              className="boton-editar-servicio"
+              className="btn boton-editar-servicio"
             >
               Editar
             </Link>
@@ -51,7 +76,7 @@ function TarjetaServicio({
             {onEliminar && (
               <button
                 type="button"
-                className="boton-eliminar-servicio"
+                className="btn boton-eliminar-servicio"
                 onClick={() =>
                   onEliminar(servicio.id)
                 }
@@ -59,8 +84,10 @@ function TarjetaServicio({
                 Eliminar
               </button>
             )}
+
           </div>
-        </div>
+        )}
+
       </div>
     </article>
   );

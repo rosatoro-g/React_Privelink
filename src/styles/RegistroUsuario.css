@@ -1,0 +1,761 @@
+
+/* ==========================================
+   1. FONDO ANIMADO PRIVÉLINK
+========================================== */
+
+.registro-pagina {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  padding: 55px 24px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  background: linear-gradient(
+    -45deg,
+    #f7f6f2,
+    #e8ecf8,
+    #d8c8a5,
+    #304fa8,
+    #243b78
+  );
+
+  background-size: 400% 400%;
+  animation: fondoRegistroPrivelink 18s ease infinite;
+}
+
+/* Luces flotantes detrás del formulario */
+
+.registro-pagina::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(216, 200, 165, 0.30),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(48, 79, 168, 0.25),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(36, 59, 120, 0.25),
+      transparent 30%
+    );
+
+  filter: blur(30px);
+  animation: lucesRegistro 14s ease-in-out infinite alternate;
+}
+
+/* Animación del degradado */
+
+@keyframes fondoRegistroPrivelink {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Animación de las luces */
+
+@keyframes lucesRegistro {
+  0% {
+    transform: translate(-2%, -2%) scale(1);
+  }
+
+  50% {
+    transform: translate(3%, 2%) scale(1.08);
+  }
+
+  100% {
+    transform: translate(-1%, 4%) scale(1.04);
+  }
+}
+
+/* ==========================================
+   2. CONTENEDOR PRINCIPAL
+========================================== */
+
+.registro-pagina .registro-layout {
+  position: relative;
+  z-index: 1;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+
+  width: 100%;
+  max-width: 1200px;
+  min-height: 720px;
+
+  overflow: hidden;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  box-shadow: 0 18px 45px rgba(36, 59, 120, 0.18);
+}
+
+.registro-pagina .registro-layout-exito {
+  min-height: 500px;
+}
+
+/* ==========================================
+   3. FORMULARIO IZQUIERDO
+========================================== */
+
+.registro-pagina .registro-formulario {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  min-width: 0;
+  padding: 45px 40px;
+
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.registro-pagina .registro-etiqueta,
+.registro-pagina .registro-panel-etiqueta {
+  margin: 0 0 12px;
+
+  color: #b59a63;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.registro-pagina .registro-encabezado h1,
+.registro-pagina .registro-exito h1 {
+  margin: 0 0 14px;
+
+  color: #243b78;
+
+  font: 500 clamp(2rem, 3vw, 3rem)/1.15
+    Georgia, "Times New Roman", serif;
+}
+
+.registro-pagina .registro-subtexto {
+  margin: 0;
+
+  color: #596073;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ==========================================
+   4. INDICADOR DE LOS TRES PASOS
+========================================== */
+
+.registro-pagina .registro-progreso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin: 32px 0 34px;
+}
+
+.registro-pagina .registro-paso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+
+  min-width: 65px;
+  color: #9aa2b1;
+}
+
+.registro-pagina .registro-paso span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  margin-bottom: 8px;
+
+  border-radius: 50%;
+  background: #e8ebf2;
+
+  color: #7a8090;
+  font-weight: 700;
+}
+
+.registro-pagina .registro-paso.activo {
+  color: #243b78;
+}
+
+.registro-pagina .registro-paso.activo span {
+  background: #3253b0;
+  color: #ffffff;
+}
+
+.registro-pagina .registro-paso small {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.registro-pagina .registro-linea {
+  flex: 1;
+  min-width: 10px;
+  height: 2px;
+
+  margin-top: -20px;
+  background: #e5e7ef;
+}
+
+/* ==========================================
+   5. TÍTULOS DE LAS SECCIONES
+========================================== */
+
+.registro-pagina .registro-seccion h2 {
+  margin: 0 0 6px;
+
+  color: #243b78;
+
+  font: 500 2rem/1.2
+    Georgia, "Times New Roman", serif;
+}
+
+.registro-pagina .registro-seccion-texto {
+  margin: 0 0 24px;
+
+  color: #6d7483;
+  line-height: 1.6;
+}
+
+/* ==========================================
+   6. CAMPOS DEL FORMULARIO
+========================================== */
+
+.registro-pagina .registro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  column-gap: 18px;
+  row-gap: 0;
+}
+
+.registro-pagina .registro-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  min-width: 0;
+  margin-bottom: 18px;
+}
+
+.registro-pagina .registro-campo-ancho {
+  grid-column: 1 / -1;
+}
+
+.registro-pagina .registro-campo label {
+  color: #1f2431;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.registro-pagina .registro-campo input,
+.registro-pagina .registro-campo select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  padding: 13px 14px;
+
+  border: 1px solid #d8dce7;
+  border-radius: 7px;
+
+  background: #fbfbfd;
+  color: #263041;
+
+  font: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.registro-pagina .registro-campo input:focus,
+.registro-pagina .registro-campo select:focus {
+  outline: none;
+
+  border-color: #3253b0;
+  background: #ffffff;
+
+  box-shadow: 0 0 0 3px rgba(50, 83, 176, 0.12);
+}
+
+/* ==========================================
+   7. CONFIRMACIÓN Y RESUMEN
+========================================== */
+
+.registro-pagina .registro-resumen {
+  margin-bottom: 20px;
+  padding: 22px;
+
+  border: 1px solid #e3e7f0;
+  border-radius: 12px;
+
+  background: #f7f8fc;
+}
+
+.registro-pagina .registro-resumen-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+
+  padding: 10px 0;
+
+  border-bottom: 1px solid #e6e8f1;
+}
+
+.registro-pagina .registro-resumen-item:last-child {
+  border-bottom: none;
+}
+
+.registro-pagina .registro-resumen-item span {
+  color: #6e7482;
+}
+
+.registro-pagina .registro-resumen-item strong {
+  color: #243b78;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   8. CONDICIONES DEL REGISTRO
+========================================== */
+
+.registro-pagina .registro-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-bottom: 14px;
+
+  color: #525a6c;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.registro-pagina .registro-check input {
+  margin-top: 4px;
+  accent-color: #3253b0;
+}
+
+/* ==========================================
+   9. MENSAJES DE ERROR
+========================================== */
+
+.registro-pagina .registro-error {
+  margin: 8px 0 15px;
+  padding: 12px 14px;
+
+  border: 1px solid #f0c8c8;
+  border-radius: 8px;
+
+  background: #fff1f1;
+  color: #a33939;
+  font-size: 0.9rem;
+}
+
+/* ==========================================
+   10. BOTONES DEL FORMULARIO
+========================================== */
+
+.registro-pagina .registro-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  margin-top: 26px;
+}
+
+.registro-pagina .registro-boton-principal,
+.registro-pagina .registro-boton-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 160px;
+  padding: 13px 22px;
+
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.registro-pagina .registro-boton-principal {
+  border: 1px solid #3253b0;
+  background: #3253b0;
+  color: #ffffff;
+}
+
+.registro-pagina .registro-boton-principal:hover {
+  border-color: #243b78;
+  background: #243b78;
+  color: #ffffff;
+}
+
+.registro-pagina .registro-boton-secundario {
+  border: 1px solid #d5d9e5;
+  background: #ffffff;
+  color: #243b78;
+}
+
+.registro-pagina .registro-boton-secundario:hover {
+  background: #f5f7fc;
+}
+
+/* ==========================================
+   11. ENLACE AL LOGIN
+========================================== */
+
+.registro-pagina .registro-pie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-top: 26px;
+  padding-top: 18px;
+
+  border-top: 1px solid #eceef4;
+  font-size: 0.95rem;
+}
+
+.registro-pagina .registro-pie p {
+  margin: 0;
+  color: #6e7482;
+}
+
+.registro-pagina .registro-pie a {
+  color: #3253b0;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.registro-pagina .registro-pie a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================
+   12. CARRUSEL DERECHO
+========================================== */
+
+.registro-pagina .registro-panel-carrusel {
+  position: relative;
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 720px;
+  padding: 0;
+
+  overflow: hidden;
+  isolation: isolate;
+
+  background: #1e2744;
+  color: #ffffff;
+}
+
+/* Las imágenes se superponen */
+
+.registro-pagina .registro-slide {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.8s ease,
+    visibility 0.8s ease;
+}
+
+/* Imagen visible */
+
+.registro-pagina .registro-slide.registro-slide-activo {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Fotografía */
+
+.registro-pagina .registro-slide-imagen {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Oscurecimiento inferior */
+
+.registro-pagina .registro-slide-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 21, 43, 0.08) 10%,
+    rgba(15, 21, 43, 0.25) 45%,
+    rgba(15, 21, 43, 0.90) 100%
+  );
+}
+
+/* Frases de las imágenes */
+
+.registro-pagina .registro-slide-contenido {
+  position: absolute;
+  z-index: 2;
+
+  bottom: 85px;
+  left: 45px;
+  right: 45px;
+
+  color: #ffffff;
+}
+
+.registro-pagina .registro-slide-contenido h2 {
+  margin: 0 0 15px;
+
+  color: #ffffff;
+
+  font: 500 clamp(2rem, 3.3vw, 3rem)/1.15
+    Georgia, "Times New Roman", serif;
+}
+
+.registro-pagina
+.registro-slide-contenido
+.registro-panel-texto {
+  margin: 0;
+  max-width: 470px;
+
+  color: #ffffff;
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+/* ==========================================
+   13. FLECHAS DEL CARRUSEL
+========================================== */
+
+.registro-pagina .registro-carrusel-flecha {
+  position: absolute;
+  z-index: 5;
+
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+
+  background: rgba(15, 21, 43, 0.5);
+  color: #ffffff;
+
+  font-size: 1.7rem;
+  cursor: pointer;
+}
+
+.registro-pagina .registro-flecha-anterior {
+  left: 18px;
+}
+
+.registro-pagina .registro-flecha-siguiente {
+  right: 18px;
+}
+
+.registro-pagina .registro-carrusel-flecha:hover {
+  background: #b59a63;
+}
+
+/* ==========================================
+   14. INDICADORES DEL CARRUSEL
+========================================== */
+
+.registro-pagina .registro-carrusel-indicadores {
+  position: absolute;
+  z-index: 5;
+
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 8px;
+}
+
+.registro-pagina .registro-carrusel-punto {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+
+  border: none;
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.registro-pagina .registro-carrusel-punto.activo {
+  width: 27px;
+  background: #d8c8a5;
+}
+
+/* ==========================================
+   15. REGISTRO COMPLETADO
+========================================== */
+
+.registro-pagina .registro-exito {
+  text-align: left;
+}
+
+.registro-pagina .registro-exito-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 64px;
+  height: 64px;
+  margin-bottom: 18px;
+
+  border-radius: 50%;
+
+  background: #ebf6ee;
+  color: #22884c;
+  font-size: 2rem;
+}
+
+/* ==========================================
+   16. DISEÑO RESPONSIVE
+========================================== */
+
+@media (max-width: 980px) {
+  .registro-pagina .registro-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .registro-pagina .registro-panel-carrusel {
+    min-height: 470px;
+  }
+}
+
+@media (max-width: 640px) {
+  .registro-pagina {
+    padding: 25px 14px;
+  }
+
+  .registro-pagina .registro-formulario {
+    padding: 30px 22px;
+  }
+
+  .registro-pagina .registro-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .registro-pagina .registro-campo-ancho {
+    grid-column: auto;
+  }
+
+  .registro-pagina .registro-progreso {
+    gap: 6px;
+  }
+
+  .registro-pagina .registro-paso {
+    min-width: 55px;
+  }
+
+  .registro-pagina .registro-paso small {
+    font-size: 0.68rem;
+  }
+
+  .registro-pagina .registro-boton-principal,
+  .registro-pagina .registro-boton-secundario {
+    width: 100%;
+  }
+
+  .registro-pagina .registro-panel-carrusel {
+    min-height: 420px;
+  }
+
+  .registro-pagina .registro-slide-contenido {
+    left: 25px;
+    right: 25px;
+    bottom: 75px;
+  }
+
+  .registro-pagina .registro-slide-contenido h2 {
+    font-size: 1.9rem;
+  }
+
+  .registro-pagina .registro-resumen-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .registro-pagina .registro-resumen-item strong {
+    text-align: left;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .registro-pagina,
+  .registro-pagina::before {
+    animation: none;
+  }
+
+  .registro-pagina .registro-slide {
+    transition: none;
+  }
+}

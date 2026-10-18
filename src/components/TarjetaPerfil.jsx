@@ -2,52 +2,73 @@ import { Link } from "react-router-dom";
 
 function TarjetaPerfil({ perfil }) {
   return (
-    <article className="tarjeta-perfil">
-      <img
-        src={perfil.imagen}
-        alt={`Foto de ${perfil.nombre}`}
-        className="tarjeta-perfil-imagen"
-      />
+    <article className="card tarjeta-perfil h-100 border-0">
+      <div className="tarjeta-imagen-contenedor">
+        <img
+          src={perfil.imagen}
+          alt={`Foto de ${perfil.nombre}`}
+          className="card-img-top tarjeta-perfil-imagen"
+        />
 
-      <div className="tarjeta-perfil-contenido">
+        <div className="tarjeta-imagen-overlay"></div>
+
         <div className="tarjeta-perfil-badges">
-          <span className="disponibilidad-badge">
+          <span className="badge disponibilidad-badge">
             {perfil.disponibilidad}
           </span>
 
           {perfil.verificado && (
-            <span className="verificado">
-              ✓ Perfil verificado
+            <span className="badge verificado">
+              ✓ Verificado
             </span>
           )}
         </div>
 
-        <h2 className="nombre-perfil">
-          {perfil.nombre}, {perfil.edad}
-        </h2>
+        <div className="tarjeta-nombre-overlay">
+          <h2>
+            {perfil.nombre}
+            <span>, {perfil.edad}</span>
+          </h2>
 
-        <p className="ubicacion-perfil">
-          📍 {perfil.ubicacion}
-        </p>
+          <p>📍 {perfil.ubicacion}</p>
+        </div>
+      </div>
 
+      <div className="card-body tarjeta-perfil-contenido d-flex flex-column">
         <p className="descripcion-perfil">
           {perfil.descripcion}
         </p>
 
-        <p className="servicios-perfil">
-          {perfil.servicios.join(" · ")}
-        </p>
+        <div className="servicios-perfil">
+          {perfil.servicios.map((servicio) => (
+            <span
+              key={servicio}
+              className="servicio-chip"
+            >
+              {servicio}
+            </span>
+          ))}
+        </div>
 
-        <p className="precio">
-          Desde ${perfil.precio.toLocaleString("es-CL")}
-        </p>
+        <div className="tarjeta-footer mt-auto">
+          <div className="precio-contenedor">
+            <span className="precio-etiqueta">
+              Desde
+            </span>
 
-        <Link
-          to={`/perfil/${perfil.id}`}
-          className="boton-perfil"
-        >
-          Ver perfil
-        </Link>
+            <p className="precio">
+              ${perfil.precio.toLocaleString("es-CL")}
+            </p>
+          </div>
+
+          <Link
+            to={`/perfil/${perfil.id}`}
+            className="btn boton-perfil"
+          >
+            Ver perfil
+            <span>→</span>
+          </Link>
+        </div>
       </div>
     </article>
   );
