@@ -20,26 +20,73 @@ import {
 
 import "../styles/Perfil.css";
 
+// =========================================================
+// OBTENER PERFILES LOCALES
+// =========================================================
+
+function obtenerPerfilesLocales() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(
+        "privelink_perfiles_colaborador"
+      ) || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+// =========================================================
+// COMPONENTE
+// =========================================================
+
 function Perfil() {
   const { id } = useParams();
 
   const perfilId = Number(id);
 
-  const perfil = perfiles.find(
-    (perfilActual) =>
-      perfilActual.id === perfilId
-  );
+  // =====================================================
+  // PERFIL
+  // =====================================================
+
+  const perfilesLocales =
+    obtenerPerfilesLocales();
+
+  const perfilLocal =
+    perfilesLocales.find(
+      (perfilActual) =>
+        Number(perfilActual.id) ===
+        perfilId
+    );
+
+  const perfilDemo =
+    perfiles.find(
+      (perfilActual) =>
+        Number(perfilActual.id) ===
+        perfilId
+    );
+
+  const perfil =
+    perfilLocal || perfilDemo;
+
+  // =====================================================
+  // ESTADOS
+  // =====================================================
 
   const [
     serviciosPerfil,
     setServiciosPerfil,
   ] = useState([]);
 
-  const [cargando, setCargando] =
-    useState(true);
+  const [
+    cargando,
+    setCargando,
+  ] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
   // =====================================================
   // SESIÓN
@@ -50,18 +97,19 @@ function Perfil() {
       "rol_usuario"
     ) || "cliente";
 
-  const perfilUsuarioId = Number(
-    localStorage.getItem(
-      "perfil_usuario_id"
-    )
-  );
+  const perfilUsuarioId =
+    Number(
+      localStorage.getItem(
+        "perfil_usuario_id"
+      )
+    );
 
   const esPropietaria =
     rolUsuario === "colaborador" &&
     perfilUsuarioId === perfilId;
 
   // =====================================================
-  // CARGAR SERVICIOS DESDE SPRING BOOT
+  // CARGAR SERVICIOS
   // =====================================================
 
   useEffect(() => {
@@ -77,23 +125,31 @@ function Perfil() {
             perfilId
           );
 
-        if (activo) {
-          setServiciosPerfil(
-            servicios
-          );
+        if (!activo) {
+          return;
         }
+
+        setServiciosPerfil(
+          Array.isArray(servicios)
+            ? servicios
+            : []
+        );
       } catch (errorCarga) {
         console.error(
           "Error al cargar servicios:",
           errorCarga
         );
 
-        if (activo) {
-          setError(
-            errorCarga.message ||
-              "No fue posible cargar los servicios."
-          );
+        if (!activo) {
+          return;
         }
+
+        setError(
+          errorCarga.message ||
+            "No fue posible cargar los servicios."
+        );
+
+        setServiciosPerfil([]);
       } finally {
         if (activo) {
           setCargando(false);
@@ -109,7 +165,7 @@ function Perfil() {
   }, [perfilId]);
 
   // =====================================================
-  // ELIMINAR
+  // ELIMINAR SERVICIO
   // =====================================================
 
   async function manejarEliminar(
@@ -167,48 +223,78 @@ function Perfil() {
 
         <main className="perfil-page">
           <div className="perfil-container">
+
             <section className="servicio-no-encontrado">
+
               <h2>
                 Perfil no encontrado
               </h2>
 
               <p>
-                El perfil que buscas no
-                se encuentra disponible.
+                El perfil que buscas no se
+                encuentra disponible.
               </p>
 
               <Link to="/feed">
                 Volver a explorar
               </Link>
+
             </section>
+
           </div>
         </main>
       </>
     );
   }
 
+  // =====================================================
+  // DATOS VISUALES
+  // =====================================================
+
+  const precioPerfil =
+    Number(
+      perfil.precio || 0
+    );
+
+  const experiencias =
+    Array.isArray(
+      perfil.servicios
+    )
+      ? perfil.servicios
+      : [];
+
+  // =====================================================
+  // INTERFAZ
+  // =====================================================
+
   return (
     <>
       <Navbar />
 
       <main className="perfil-page">
+
         <div className="perfil-container">
+
           <div className="perfil-layout">
 
-            {/* =================================================
-                INFORMACIÓN DEL PERFIL
-                ================================================= */}
+            {/* ===========================================
+                PERFIL
+                =========================================== */}
 
             <aside className="perfil-sidebar">
+
               <section className="perfil-card">
 
                 <div className="perfil-portada">
+
                   <div className="perfil-imagen-wrap">
+
                     <img
                       src={perfil.imagen}
                       alt={`Foto de ${perfil.nombre}`}
                       className="perfil-imagen"
                     />
+
                   </div>
 
                   <div className="perfil-portada-degradado"></div>
@@ -216,11 +302,13 @@ function Perfil() {
                   <div className="perfil-portada-etiqueta">
                     PRIVÉLINK
                   </div>
+
                 </div>
 
                 <div className="perfil-card-info">
 
                   <div className="perfil-identidad">
+
                     <p className="perfil-seccion-label">
                       {esPropietaria
                         ? "MI PERFIL"
@@ -228,9 +316,13 @@ function Perfil() {
                     </p>
 
                     <div className="perfil-titulo-fila">
+
                       <h1 className="perfil-nombre">
-                        {perfil.nombre},{" "}
-                        {perfil.edad}
+                        {perfil.nombre}
+
+                        {perfil.edad
+                          ? `, ${perfil.edad}`
+                          : ""}
                       </h1>
 
                       {perfil.verificado && (
@@ -238,17 +330,25 @@ function Perfil() {
                           ✓ Verificado
                         </span>
                       )}
+
                     </div>
 
                     <p className="perfil-ubicacion">
-                      <span>📍</span>
+
+                      <span>
+                        📍
+                      </span>
+
                       {perfil.ubicacion}
+
                     </p>
+
                   </div>
 
                   <div className="perfil-separador"></div>
 
                   <div className="perfil-sobre-mi">
+
                     <span className="perfil-mini-label">
                       SOBRE MÍ
                     </span>
@@ -256,49 +356,66 @@ function Perfil() {
                     <p className="perfil-descripcion">
                       {perfil.descripcion}
                     </p>
+
                   </div>
 
                   <div className="perfil-disponibilidad">
+
                     <span className="perfil-disponibilidad-punto"></span>
 
-                    {perfil.disponibilidad}
+                    {perfil.disponibilidad ||
+                      "Disponible hoy"}
+
                   </div>
 
-                  <div className="perfil-experiencias">
-                    <span className="perfil-mini-label">
-                      EXPERIENCIAS
-                    </span>
+                  {experiencias.length > 0 && (
+                    <div className="perfil-experiencias">
 
-                    <div className="perfil-tags">
-                      {perfil.servicios.map(
-                        (servicio) => (
-                          <span
-                            key={servicio}
-                            className="perfil-tag"
-                          >
-                            {servicio}
-                          </span>
-                        )
-                      )}
+                      <span className="perfil-mini-label">
+                        EXPERIENCIAS
+                      </span>
+
+                      <div className="perfil-tags">
+
+                        {experiencias.map(
+                          (experiencia) => (
+                            <span
+                              key={
+                                experiencia
+                              }
+                              className="perfil-tag"
+                            >
+                              {
+                                experiencia
+                              }
+                            </span>
+                          )
+                        )}
+
+                      </div>
+
                     </div>
-                  </div>
+                  )}
 
                   <div className="perfil-resumen">
 
                     <div className="perfil-resumen-item">
+
                       <span className="perfil-resumen-label">
                         Desde
                       </span>
 
                       <strong>
                         $
-                        {perfil.precio.toLocaleString(
+                        {precioPerfil.toLocaleString(
                           "es-CL"
                         )}
                       </strong>
+
                     </div>
 
                     <div className="perfil-resumen-item">
+
                       <span className="perfil-resumen-label">
                         Servicios
                       </span>
@@ -308,9 +425,11 @@ function Perfil() {
                           serviciosPerfil.length
                         }
                       </strong>
+
                     </div>
 
                     <div className="perfil-resumen-item">
+
                       <span className="perfil-resumen-label">
                         Estado
                       </span>
@@ -318,36 +437,47 @@ function Perfil() {
                       <strong className="perfil-resumen-estado">
                         Activo
                       </strong>
+
                     </div>
 
                   </div>
+
                 </div>
+
               </section>
+
             </aside>
 
-            {/* =================================================
+            {/* ===========================================
                 SERVICIOS
-                ================================================= */}
+                =========================================== */}
 
             <section className="perfil-main">
 
               <div className="perfil-servicios-superior">
+
                 <div>
+
                   <p className="perfil-seccion-label">
                     EXPERIENCIAS
                   </p>
 
                   <h2 className="perfil-servicios-titulo">
+
                     {esPropietaria
                       ? "Mis servicios"
                       : "Servicios disponibles"}
+
                   </h2>
 
                   <p className="perfil-servicios-descripcion">
+
                     {esPropietaria
                       ? "Administra las experiencias que tienes publicadas en tu perfil."
                       : "Descubre las experiencias disponibles, sus características, valores y ubicaciones."}
+
                   </p>
+
                 </div>
 
                 {esPropietaria && (
@@ -355,61 +485,95 @@ function Perfil() {
                     to={`/agregar-servicio?perfil=${perfil.id}`}
                     className="boton-agregar-servicio"
                   >
-                    <span>+</span>
+                    <span>
+                      +
+                    </span>
+
                     Agregar servicio
                   </Link>
                 )}
+
               </div>
+
+              {/* ERROR */}
 
               {error && (
                 <div className="sin-servicios">
-                  <p>{error}</p>
+                  <p>
+                    {error}
+                  </p>
                 </div>
               )}
 
-              {cargando ? (
+              {/* CARGANDO */}
+
+              {!error && cargando && (
                 <div className="sin-servicios">
                   <p>
                     Cargando servicios...
                   </p>
                 </div>
-              ) : serviciosPerfil.length >
-                0 ? (
-                <div className="perfil-servicios-grid">
-                  {serviciosPerfil.map(
-                    (servicio) => (
-                      <TarjetaServicio
-                        key={servicio.id}
-                        servicio={
-                          servicio
-                        }
-                        puedeEditar={
-                          esPropietaria
-                        }
-                        onEliminar={
-                          esPropietaria
-                            ? manejarEliminar
-                            : undefined
-                        }
-                      />
-                    )
-                  )}
-                </div>
-              ) : (
-                !error && (
+              )}
+
+              {/* SERVICIOS */}
+
+              {!error &&
+                !cargando &&
+                serviciosPerfil.length > 0 && (
+
+                  <div className="perfil-servicios-grid">
+
+                    {serviciosPerfil.map(
+                      (servicio) => (
+
+                        <TarjetaServicio
+                          key={
+                            servicio.id
+                          }
+                          servicio={
+                            servicio
+                          }
+                          puedeEditar={
+                            esPropietaria
+                          }
+                          onEliminar={
+                            esPropietaria
+                              ? manejarEliminar
+                              : undefined
+                          }
+                        />
+
+                      )
+                    )}
+
+                  </div>
+
+                )}
+
+              {/* SIN SERVICIOS */}
+
+              {!error &&
+                !cargando &&
+                serviciosPerfil.length === 0 && (
+
                   <div className="sin-servicios">
+
                     <p>
                       {esPropietaria
                         ? "Todavía no tienes servicios publicados."
                         : "Este perfil todavía no tiene servicios disponibles."}
                     </p>
+
                   </div>
-                )
-              )}
+
+                )}
 
             </section>
+
           </div>
+
         </div>
+
       </main>
     </>
   );

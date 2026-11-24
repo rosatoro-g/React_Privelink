@@ -1,20 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// =========================================================
-// CONFIGURACIÓN API
-// =========================================================
-
 const API_URL = "http://localhost:8080";
 
 // =========================================================
-// RUTAS SEGÚN ROL DEL BACKEND
+// RUTAS SEGÚN ROL
 // =========================================================
 
 const rutasPorRol = {
   ADMIN: "/inicio-admin",
   CLIENTE: "/feed",
-  COLABORADOR: "/perfil/1",
 };
 
 // =========================================================
@@ -34,31 +29,63 @@ const rolBackendPorFrontend = {
 };
 
 // =========================================================
+// PERFILES LOCALES DE COLABORADORES
+// =========================================================
+
+function obtenerPerfilesColaborador() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(
+        "privelink_perfiles_colaborador"
+      ) || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+// =========================================================
 // HOOK LOGIN
 // =========================================================
 
 export function useLogin() {
   const navigate = useNavigate();
 
-  const [rol, setRol] = useState("cliente");
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState("");
-  const [cargando, setCargando] = useState(false);
+  const [rol, setRol] =
+    useState("cliente");
 
-  const manejarLogin = async (evento) => {
+  const [correo, setCorreo] =
+    useState("");
+
+  const [
+    contrasena,
+    setContrasena,
+  ] = useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [cargando, setCargando] =
+    useState(false);
+
+  // =======================================================
+  // INICIAR SESIÓN
+  // =======================================================
+
+  const manejarLogin = async (
+    evento
+  ) => {
     evento.preventDefault();
 
     setError("");
 
-    // =====================================================
-    // VALIDAR CAMPOS
-    // =====================================================
-
     const correoNormalizado =
       correo.trim().toLowerCase();
 
-    if (!correoNormalizado || !contrasena.trim()) {
+    if (
+      !correoNormalizado ||
+      !contrasena.trim()
+    ) {
       setError(
         "Ingresa tu correo y contraseña."
       );
@@ -69,9 +96,9 @@ export function useLogin() {
     try {
       setCargando(true);
 
-      // =====================================================
+      // ===================================================
       // LOGIN REAL CONTRA SPRING BOOT
-      // =====================================================
+      // ===================================================
 
       const respuesta = await fetch(
         `${API_URL}/api/auth/login`,
@@ -79,12 +106,15 @@ export function useLogin() {
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
 
           body: JSON.stringify({
-            correo: correoNormalizado,
-            password: contrasena,
+            correo:
+              correoNormalizado,
+            password:
+              contrasena,
           }),
         }
       );
@@ -92,25 +122,26 @@ export function useLogin() {
       let datos = {};
 
       try {
-        datos = await respuesta.json();
+        datos =
+          await respuesta.json();
       } catch {
         datos = {};
       }
 
-      // =====================================================
+      // ===================================================
       // ERROR DEL BACKEND
-      // =====================================================
+      // ===================================================
 
       if (!respuesta.ok) {
         throw new Error(
           datos.mensaje ||
-            "No fue posible iniciar sesión."
+            "Correo o contraseña incorrectos."
         );
       }
 
-      // =====================================================
+      // ===================================================
       // VALIDAR RESPUESTA
-      // =====================================================
+      // ===================================================
 
       if (
         !datos.id ||
@@ -122,17 +153,21 @@ export function useLogin() {
         );
       }
 
-      // =====================================================
-      // COMPROBAR ROL SELECCIONADO
-      // =====================================================
+      // ===================================================
+      // VALIDAR ROL SELECCIONADO
+      // ===================================================
 
       const rolEsperadoBackend =
         rolBackendPorFrontend[rol];
 
-      if (rolEsperadoBackend !== datos.rol) {
+      if (
+        rolEsperadoBackend !==
+        datos.rol
+      ) {
         const nombreRol =
-          rolFrontendPorBackend[datos.rol] ||
-          datos.rol;
+          rolFrontendPorBackend[
+            datos.rol
+          ] || datos.rol;
 
         setError(
           `Esta cuenta corresponde al rol ${nombreRol}.`
@@ -141,46 +176,61 @@ export function useLogin() {
         return;
       }
 
-      // =====================================================
-      // CONVERTIR ROL PARA FRONTEND
-      // =====================================================
-
       const rolFrontend =
-        rolFrontendPorBackend[datos.rol];
+        rolFrontendPorBackend[
+          datos.rol
+        ];
 
-      // =====================================================
-      // PERFIL DE COLABORADOR
-      // =====================================================
-      // Por ahora mantenemos perfilId = 1 para conservar
-      // compatibilidad con el frontend actual.
-      //
-      // Más adelante podremos relacionar el perfil real
-      // con el usuario del backend.
+      // ===================================================
+      // BUSCAR PERFIL DEL COLABORADOR
+      // ===================================================
 
-      const perfilId =
-        datos.rol === "COLABORADOR"
-          ? 1
-          : null;
+      let perfilId = null;
 
-      // =====================================================
+      if (
+        datos.rol ===
+        "COLABORADOR"
+      ) {
+        const perfiles =
+          obtenerPerfilesColaborador();
+
+        const perfilUsuario =
+          perfiles.find(
+            (perfil) =>
+              perfil.usuarioId ===
+                datos.id ||
+              perfil.correo?.toLowerCase() ===
+                datos.correo?.toLowerCase()
+          );
+
+        /*
+         * Si es un colaborador antiguo
+         * que no tiene perfil local,
+         * mantenemos perfil 1 como fallback.
+         */
+        perfilId =
+          perfilUsuario?.id || 1;
+      }
+
+      // ===================================================
       // GUARDAR SESIÓN
-      // =====================================================
+      // ===================================================
 
       const sesion = {
         id: datos.id,
         nombre: datos.nombre,
         correo: datos.correo,
 
-        // Rol usado actualmente por el frontend
-        rol: rolFrontend,
+        rol:
+          rolFrontend,
 
-        // Rol real enviado por Spring Boot
-        rolBackend: datos.rol,
+        rolBackend:
+          datos.rol,
 
         perfilId,
 
-        // JWT
-        token: datos.token,
+        token:
+          datos.token,
       };
 
       localStorage.setItem(
@@ -188,23 +238,23 @@ export function useLogin() {
         JSON.stringify(sesion)
       );
 
-      // Token separado para facilitar llamadas HTTP
       localStorage.setItem(
         "privelink_token",
         datos.token
       );
-
-      // =====================================================
-      // COMPATIBILIDAD CON PERFIL.JSX Y NAVBAR.JSX
-      // =====================================================
 
       localStorage.setItem(
         "rol_usuario",
         rolFrontend
       );
 
+      // ===================================================
+      // PERFIL DEL COLABORADOR
+      // ===================================================
+
       if (
-        rolFrontend === "colaborador" &&
+        rolFrontend ===
+          "colaborador" &&
         perfilId
       ) {
         localStorage.setItem(
@@ -217,11 +267,14 @@ export function useLogin() {
         );
       }
 
-      // =====================================================
+      // ===================================================
       // REDIRECCIÓN
-      // =====================================================
+      // ===================================================
 
-      if (datos.rol === "COLABORADOR") {
+      if (
+        datos.rol ===
+        "COLABORADOR"
+      ) {
         navigate(
           `/perfil/${perfilId}`,
           {
@@ -233,7 +286,9 @@ export function useLogin() {
       }
 
       const rutaDestino =
-        rutasPorRol[datos.rol];
+        rutasPorRol[
+          datos.rol
+        ];
 
       if (!rutaDestino) {
         throw new Error(
@@ -247,7 +302,6 @@ export function useLogin() {
           replace: true,
         }
       );
-
     } catch (errorLogin) {
       console.error(
         "Error al iniciar sesión:",
@@ -258,7 +312,6 @@ export function useLogin() {
         errorLogin.message ||
           "No fue posible iniciar sesión."
       );
-
     } finally {
       setCargando(false);
     }
