@@ -4,7 +4,15 @@ import servicioCine from "../assets/img/servicio-cine.jpg";
 import servicioConcierto from "../assets/img/servicio-concierto.jpg";
 import servicioBoda from "../assets/img/servicio-boda.jpg";
 
-const STORAGE_KEY = "privelink_servicios";
+// =========================================================
+// CONFIGURACIÓN API
+// =========================================================
+
+const API_URL = "http://localhost:8080/api/servicios";
+
+// =========================================================
+// IMÁGENES LOCALES
+// =========================================================
 
 const imagenes = {
   evento: servicioEvento,
@@ -14,175 +22,273 @@ const imagenes = {
   boda: servicioBoda,
 };
 
-const serviciosIniciales = [
-  {
-    id: 1,
-    perfilId: 1,
-    nombre: "Acompañamiento a eventos",
-    categoria: "Eventos",
-    descripcion:
-      "Acompañamiento para eventos sociales, celebraciones y ocasiones especiales.",
-    precio: 45000,
-    ubicacion: "Valdivia",
-    imagen: "evento",
-  },
-  {
-    id: 2,
-    perfilId: 1,
-    nombre: "Cena y compañía",
-    categoria: "Cena",
-    descripcion:
-      "Una experiencia tranquila para compartir una cena y una buena conversación.",
-    precio: 40000,
-    ubicacion: "Valdivia",
-    imagen: "cena",
-  },
-  {
-    id: 3,
-    perfilId: 1,
-    nombre: "Salida al cine",
-    categoria: "Acompañamiento",
-    descripcion:
-      "Una salida relajada para disfrutar una película y compartir un buen momento.",
-    precio: 35000,
-    ubicacion: "Valdivia",
-    imagen: "cine",
-  },
-  {
-    id: 4,
-    perfilId: 2,
-    nombre: "Noche de concierto",
-    categoria: "Experiencias",
-    descripcion:
-      "Acompañamiento para conciertos, presentaciones y eventos musicales.",
-    precio: 50000,
-    ubicacion: "Valdivia",
-    imagen: "concierto",
-  },
-  {
-    id: 5,
-    perfilId: 2,
-    nombre: "Acompañamiento para eventos",
-    categoria: "Eventos",
-    descripcion:
-      "Compañía para eventos sociales y actividades especiales.",
-    precio: 40000,
-    ubicacion: "Valdivia",
-    imagen: "evento",
-  },
-  {
-    id: 6,
-    perfilId: 3,
-    nombre: "Cena y compañía",
-    categoria: "Cena",
-    descripcion:
-      "Una experiencia para disfrutar gastronomía y buena conversación.",
-    precio: 45000,
-    ubicacion: "Temuco",
-    imagen: "cena",
-  },
-  {
-    id: 7,
-    perfilId: 3,
-    nombre: "Acompañamiento para bodas",
-    categoria: "Eventos",
-    descripcion:
-      "Acompañamiento para matrimonios, celebraciones y ocasiones especiales.",
-    precio: 60000,
-    ubicacion: "Temuco",
-    imagen: "boda",
-  },
-];
+// =========================================================
+// OBTENER TOKEN
+// =========================================================
 
-function inicializarServicios() {
-  const guardados = localStorage.getItem(STORAGE_KEY);
+function obtenerToken() {
+  const token = localStorage.getItem("privelink_token");
 
-  if (!guardados) {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(serviciosIniciales)
-    );
+  if (token) {
+    return token;
+  }
+
+  const sesionGuardada =
+    localStorage.getItem("privelink_sesion");
+
+  if (!sesionGuardada) {
+    return null;
+  }
+
+  try {
+    const sesion =
+      JSON.parse(sesionGuardada);
+
+    return sesion.token || null;
+  } catch {
+    return null;
   }
 }
 
-export function obtenerServicios() {
-  inicializarServicios();
+// =========================================================
+// HEADERS AUTORIZADOS
+// =========================================================
 
-  return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-}
+function obtenerHeaders() {
+  const token = obtenerToken();
 
-export function obtenerServiciosPorPerfil(perfilId) {
-  return obtenerServicios().filter(
-    (servicio) => servicio.perfilId === Number(perfilId)
-  );
-}
-
-export function obtenerServicioPorId(id) {
-  return obtenerServicios().find(
-    (servicio) => servicio.id === Number(id)
-  );
-}
-
-export function obtenerImagenServicio(nombreImagen) {
-  return imagenes[nombreImagen] || servicioEvento;
-}
-
-export function crearServicio(nuevoServicio) {
-  const servicios = obtenerServicios();
-
-  const servicio = {
-    ...nuevoServicio,
-    id: Date.now(),
-    perfilId: Number(nuevoServicio.perfilId),
-    precio: Number(nuevoServicio.precio),
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
   };
 
-  servicios.push(servicio);
+  if (token) {
+    headers.Authorization =
+      `Bearer ${token}`;
+  }
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(servicios)
-  );
-
-  return servicio;
+  return headers;
 }
 
-export function actualizarServicio(id, datosActualizados) {
-  const servicios = obtenerServicios();
+// =========================================================
+// MANEJO DE RESPUESTAS
+// =========================================================
 
-  const actualizados = servicios.map((servicio) =>
-    servicio.id === Number(id)
-      ? {
-          ...servicio,
-          ...datosActualizados,
-          precio: Number(
-            datosActualizados.precio ?? servicio.precio
-          ),
-        }
-      : servicio
-  );
+async function procesarRespuesta(respuesta) {
+  if (respuesta.status === 204) {
+    return null;
+  }
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(actualizados)
-  );
+  let datos = null;
 
-  return actualizados;
+  try {
+    datos = await respuesta.json();
+  } catch {
+    datos = null;
+  }
+
+  if (!respuesta.ok) {
+    if (respuesta.status === 401) {
+      throw new Error(
+        "Tu sesión expiró o no es válida. Inicia sesión nuevamente."
+      );
+    }
+
+    if (respuesta.status === 403) {
+      throw new Error(
+        datos?.mensaje ||
+          "No tienes permisos para realizar esta acción."
+      );
+    }
+
+    if (respuesta.status === 404) {
+      throw new Error(
+        datos?.mensaje ||
+          "El servicio solicitado no existe."
+      );
+    }
+
+    throw new Error(
+      datos?.mensaje ||
+        "Ocurrió un error al comunicarse con el servidor."
+    );
+  }
+
+  return datos;
 }
 
-export function eliminarServicio(id) {
-  const servicios = obtenerServicios();
+// =========================================================
+// OBTENER TODOS LOS SERVICIOS
+// =========================================================
 
-  const actualizados = servicios.filter(
-    (servicio) => servicio.id !== Number(id)
+export async function obtenerServicios() {
+  const respuesta = await fetch(
+    API_URL,
+    {
+      method: "GET",
+      headers: obtenerHeaders(),
+    }
   );
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(actualizados)
-  );
+  const datos =
+    await procesarRespuesta(respuesta);
 
-  return actualizados;
+  return Array.isArray(datos)
+    ? datos
+    : [];
 }
 
-export default serviciosIniciales;
+// =========================================================
+// OBTENER SERVICIOS POR PERFIL
+// =========================================================
+
+export async function obtenerServiciosPorPerfil(
+  perfilId
+) {
+  const respuesta = await fetch(
+    `${API_URL}?perfilId=${encodeURIComponent(
+      String(perfilId)
+    )}`,
+    {
+      method: "GET",
+      headers: obtenerHeaders(),
+    }
+  );
+
+  const datos =
+    await procesarRespuesta(respuesta);
+
+  return Array.isArray(datos)
+    ? datos
+    : [];
+}
+
+// =========================================================
+// OBTENER SERVICIO POR ID
+// =========================================================
+
+export async function obtenerServicioPorId(id) {
+  const respuesta = await fetch(
+    `${API_URL}/${id}`,
+    {
+      method: "GET",
+      headers: obtenerHeaders(),
+    }
+  );
+
+  return await procesarRespuesta(
+    respuesta
+  );
+}
+
+// =========================================================
+// OBTENER IMAGEN
+// =========================================================
+
+export function obtenerImagenServicio(
+  nombreImagen
+) {
+  return (
+    imagenes[nombreImagen] ||
+    servicioEvento
+  );
+}
+
+// =========================================================
+// CREAR SERVICIO
+// =========================================================
+
+export async function crearServicio(
+  nuevoServicio
+) {
+  const servicio = {
+    perfilId: String(
+      nuevoServicio.perfilId
+    ),
+    nombre:
+      nuevoServicio.nombre.trim(),
+    categoria:
+      nuevoServicio.categoria,
+    descripcion:
+      nuevoServicio.descripcion.trim(),
+    precio: Number(
+      nuevoServicio.precio
+    ),
+    ubicacion:
+      nuevoServicio.ubicacion.trim(),
+    imagen:
+      nuevoServicio.imagen,
+  };
+
+  const respuesta = await fetch(
+    API_URL,
+    {
+      method: "POST",
+      headers: obtenerHeaders(),
+      body: JSON.stringify(servicio),
+    }
+  );
+
+  return await procesarRespuesta(
+    respuesta
+  );
+}
+
+// =========================================================
+// ACTUALIZAR SERVICIO
+// =========================================================
+
+export async function actualizarServicio(
+  id,
+  datosActualizados
+) {
+  const servicio = {
+    perfilId: String(
+      datosActualizados.perfilId
+    ),
+    nombre:
+      datosActualizados.nombre.trim(),
+    categoria:
+      datosActualizados.categoria,
+    descripcion:
+      datosActualizados.descripcion.trim(),
+    precio: Number(
+      datosActualizados.precio
+    ),
+    ubicacion:
+      datosActualizados.ubicacion.trim(),
+    imagen:
+      datosActualizados.imagen,
+  };
+
+  const respuesta = await fetch(
+    `${API_URL}/${id}`,
+    {
+      method: "PUT",
+      headers: obtenerHeaders(),
+      body: JSON.stringify(servicio),
+    }
+  );
+
+  return await procesarRespuesta(
+    respuesta
+  );
+}
+
+// =========================================================
+// ELIMINAR SERVICIO
+// =========================================================
+
+export async function eliminarServicio(id) {
+  const respuesta = await fetch(
+    `${API_URL}/${id}`,
+    {
+      method: "DELETE",
+      headers: obtenerHeaders(),
+    }
+  );
+
+  return await procesarRespuesta(
+    respuesta
+  );
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Link,
   useNavigate,
@@ -7,44 +8,65 @@ import {
 
 import Navbar from "../components/Navbar";
 import perfiles from "../data/Perfiles";
-import { crearServicio } from "../data/Servicios";
+
+import {
+  crearServicio,
+} from "../data/Servicios";
 
 import "../styles/Servicio.css";
 
 function AgregarServicio() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+
+  const [searchParams] =
+    useSearchParams();
 
   const perfilId = Number(
     searchParams.get("perfil") || 1
   );
 
   const perfil = perfiles.find(
-    (perfil) => perfil.id === perfilId
+    (perfilActual) =>
+      perfilActual.id === perfilId
   );
 
-  const [formulario, setFormulario] = useState({
-    nombre: "",
-    categoria: "",
-    descripcion: "",
-    precio: "",
-    ubicacion: perfil?.ubicacion || "",
-    imagen: "evento",
-  });
+  const [formulario, setFormulario] =
+    useState({
+      nombre: "",
+      categoria: "",
+      descripcion: "",
+      precio: "",
+      ubicacion:
+        perfil?.ubicacion || "",
+      imagen: "evento",
+    });
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
+
+  const [guardando, setGuardando] =
+    useState(false);
 
   function manejarCambio(evento) {
-    const { name, value } = evento.target;
+    const {
+      name,
+      value,
+    } = evento.target;
 
-    setFormulario((anterior) => ({
-      ...anterior,
-      [name]: value,
-    }));
+    setFormulario(
+      (anterior) => ({
+        ...anterior,
+        [name]: value,
+      })
+    );
   }
 
-  function manejarSubmit(evento) {
+  async function manejarSubmit(
+    evento
+  ) {
     evento.preventDefault();
+
+    setError("");
 
     if (
       !formulario.nombre.trim() ||
@@ -53,21 +75,50 @@ function AgregarServicio() {
       !formulario.precio ||
       !formulario.ubicacion.trim()
     ) {
-      setError("Completa todos los campos obligatorios.");
+      setError(
+        "Completa todos los campos obligatorios."
+      );
+
       return;
     }
 
-    if (Number(formulario.precio) <= 0) {
-      setError("El precio debe ser mayor a $0.");
+    if (
+      Number(formulario.precio) <= 0
+    ) {
+      setError(
+        "El precio debe ser mayor a $0."
+      );
+
       return;
     }
 
-    crearServicio({
-      ...formulario,
-      perfilId,
-    });
+    try {
+      setGuardando(true);
 
-    navigate(`/perfil/${perfilId}`);
+      await crearServicio({
+        ...formulario,
+        perfilId,
+      });
+
+      navigate(
+        `/perfil/${perfilId}`,
+        {
+          replace: true,
+        }
+      );
+    } catch (errorCrear) {
+      console.error(
+        "Error al crear servicio:",
+        errorCrear
+      );
+
+      setError(
+        errorCrear.message ||
+          "No fue posible publicar el servicio."
+      );
+    } finally {
+      setGuardando(false);
+    }
   }
 
   if (!perfil) {
@@ -76,7 +127,9 @@ function AgregarServicio() {
         <Navbar />
 
         <main className="servicio-no-encontrado">
-          <h2>Perfil no encontrado</h2>
+          <h2>
+            Perfil no encontrado
+          </h2>
 
           <Link to="/feed">
             Volver al feed
@@ -92,23 +145,33 @@ function AgregarServicio() {
 
       <main className="agregar-servicio">
         <section className="agregar-servicio-contenedor">
+
           <div className="agregar-servicio-titulo">
             <p className="servicio-etiqueta">
               NUEVO SERVICIO
             </p>
 
-            <h1>Publicar experiencia</h1>
+            <h1>
+              Publicar experiencia
+            </h1>
 
             <p>
-              Agrega un nuevo servicio al perfil de{" "}
-              <strong>{perfil.nombre}</strong>.
+              Agrega un nuevo servicio
+              al perfil de{" "}
+              <strong>
+                {perfil.nombre}
+              </strong>
+              .
             </p>
           </div>
 
           <form
             className="formulario-servicio"
-            onSubmit={manejarSubmit}
+            onSubmit={
+              manejarSubmit
+            }
           >
+
             {error && (
               <p className="mensaje-error">
                 {error}
@@ -124,9 +187,15 @@ function AgregarServicio() {
                 id="nombre"
                 name="nombre"
                 type="text"
-                value={formulario.nombre}
-                onChange={manejarCambio}
+                value={
+                  formulario.nombre
+                }
+                onChange={
+                  manejarCambio
+                }
                 placeholder="Ej: Cena y compañía"
+                disabled={guardando}
+                required
               />
             </div>
 
@@ -138,11 +207,18 @@ function AgregarServicio() {
               <select
                 id="categoria"
                 name="categoria"
-                value={formulario.categoria}
-                onChange={manejarCambio}
+                value={
+                  formulario.categoria
+                }
+                onChange={
+                  manejarCambio
+                }
+                disabled={guardando}
+                required
               >
                 <option value="">
-                  Selecciona una categoría
+                  Selecciona una
+                  categoría
                 </option>
 
                 <option value="Acompañamiento">
@@ -175,10 +251,16 @@ function AgregarServicio() {
               <textarea
                 id="descripcion"
                 name="descripcion"
-                value={formulario.descripcion}
-                onChange={manejarCambio}
+                value={
+                  formulario.descripcion
+                }
+                onChange={
+                  manejarCambio
+                }
                 placeholder="Describe brevemente la experiencia..."
                 rows="5"
+                disabled={guardando}
+                required
               />
             </div>
 
@@ -192,9 +274,15 @@ function AgregarServicio() {
                 name="precio"
                 type="number"
                 min="1"
-                value={formulario.precio}
-                onChange={manejarCambio}
+                value={
+                  formulario.precio
+                }
+                onChange={
+                  manejarCambio
+                }
                 placeholder="40000"
+                disabled={guardando}
+                required
               />
             </div>
 
@@ -207,9 +295,15 @@ function AgregarServicio() {
                 id="ubicacion"
                 name="ubicacion"
                 type="text"
-                value={formulario.ubicacion}
-                onChange={manejarCambio}
+                value={
+                  formulario.ubicacion
+                }
+                onChange={
+                  manejarCambio
+                }
                 placeholder="Valdivia"
+                disabled={guardando}
+                required
               />
             </div>
 
@@ -221,8 +315,13 @@ function AgregarServicio() {
               <select
                 id="imagen"
                 name="imagen"
-                value={formulario.imagen}
-                onChange={manejarCambio}
+                value={
+                  formulario.imagen
+                }
+                onChange={
+                  manejarCambio
+                }
+                disabled={guardando}
               >
                 <option value="evento">
                   Evento
@@ -247,6 +346,7 @@ function AgregarServicio() {
             </div>
 
             <div className="acciones-formulario">
+
               <Link
                 to={`/perfil/${perfilId}`}
                 className="boton-cancelar"
@@ -257,9 +357,13 @@ function AgregarServicio() {
               <button
                 type="submit"
                 className="boton-guardar"
+                disabled={guardando}
               >
-                Publicar servicio
+                {guardando
+                  ? "Publicando..."
+                  : "Publicar servicio"}
               </button>
+
             </div>
           </form>
         </section>

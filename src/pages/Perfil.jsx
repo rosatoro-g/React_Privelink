@@ -1,4 +1,8 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   Link,
   useParams,
@@ -22,57 +26,139 @@ function Perfil() {
   const perfilId = Number(id);
 
   const perfil = perfiles.find(
-    (perfilActual) => perfilActual.id === perfilId
+    (perfilActual) =>
+      perfilActual.id === perfilId
   );
 
-  const [serviciosPerfil, setServiciosPerfil] =
-    useState(() =>
-      obtenerServiciosPorPerfil(perfilId)
-    );
+  const [
+    serviciosPerfil,
+    setServiciosPerfil,
+  ] = useState([]);
 
-  /*
-   * SIMULACIÓN DE AUTORIZACIÓN
-   *
-   * rol_usuario:
-   * - cliente
-   * - colaborador
-   * - admin
-   *
-   * perfil_usuario_id:
-   * ID del perfil perteneciente a la colaboradora
-   * que inició sesión.
-   */
+  const [cargando, setCargando] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  // =====================================================
+  // SESIÓN
+  // =====================================================
 
   const rolUsuario =
-    localStorage.getItem("rol_usuario") || "cliente";
+    localStorage.getItem(
+      "rol_usuario"
+    ) || "cliente";
 
   const perfilUsuarioId = Number(
-    localStorage.getItem("perfil_usuario_id")
+    localStorage.getItem(
+      "perfil_usuario_id"
+    )
   );
 
   const esPropietaria =
     rolUsuario === "colaborador" &&
     perfilUsuarioId === perfilId;
 
-  function manejarEliminar(servicioId) {
+  // =====================================================
+  // CARGAR SERVICIOS DESDE SPRING BOOT
+  // =====================================================
+
+  useEffect(() => {
+    let activo = true;
+
+    async function cargarServicios() {
+      try {
+        setCargando(true);
+        setError("");
+
+        const servicios =
+          await obtenerServiciosPorPerfil(
+            perfilId
+          );
+
+        if (activo) {
+          setServiciosPerfil(
+            servicios
+          );
+        }
+      } catch (errorCarga) {
+        console.error(
+          "Error al cargar servicios:",
+          errorCarga
+        );
+
+        if (activo) {
+          setError(
+            errorCarga.message ||
+              "No fue posible cargar los servicios."
+          );
+        }
+      } finally {
+        if (activo) {
+          setCargando(false);
+        }
+      }
+    }
+
+    cargarServicios();
+
+    return () => {
+      activo = false;
+    };
+  }, [perfilId]);
+
+  // =====================================================
+  // ELIMINAR
+  // =====================================================
+
+  async function manejarEliminar(
+    servicioId
+  ) {
     if (!esPropietaria) {
       return;
     }
 
-    const confirmar = window.confirm(
-      "¿Deseas eliminar este servicio?"
-    );
+    const confirmar =
+      window.confirm(
+        "¿Deseas eliminar este servicio?"
+      );
 
     if (!confirmar) {
       return;
     }
 
-    eliminarServicio(servicioId);
+    try {
+      setError("");
 
-    setServiciosPerfil(
-      obtenerServiciosPorPerfil(perfilId)
-    );
+      await eliminarServicio(
+        servicioId
+      );
+
+      setServiciosPerfil(
+        (serviciosActuales) =>
+          serviciosActuales.filter(
+            (servicio) =>
+              servicio.id !==
+              servicioId
+          )
+      );
+    } catch (errorEliminar) {
+      console.error(
+        "Error al eliminar servicio:",
+        errorEliminar
+      );
+
+      setError(
+        errorEliminar.message ||
+          "No fue posible eliminar el servicio."
+      );
+    }
   }
+
+  // =====================================================
+  // PERFIL NO ENCONTRADO
+  // =====================================================
 
   if (!perfil) {
     return (
@@ -82,10 +168,13 @@ function Perfil() {
         <main className="perfil-page">
           <div className="perfil-container">
             <section className="servicio-no-encontrado">
-              <h2>Perfil no encontrado</h2>
+              <h2>
+                Perfil no encontrado
+              </h2>
 
               <p>
-                El perfil que buscas no se encuentra disponible.
+                El perfil que buscas no
+                se encuentra disponible.
               </p>
 
               <Link to="/feed">
@@ -140,7 +229,8 @@ function Perfil() {
 
                     <div className="perfil-titulo-fila">
                       <h1 className="perfil-nombre">
-                        {perfil.nombre}, {perfil.edad}
+                        {perfil.nombre},{" "}
+                        {perfil.edad}
                       </h1>
 
                       {perfil.verificado && (
@@ -180,14 +270,16 @@ function Perfil() {
                     </span>
 
                     <div className="perfil-tags">
-                      {perfil.servicios.map((servicio) => (
-                        <span
-                          key={servicio}
-                          className="perfil-tag"
-                        >
-                          {servicio}
-                        </span>
-                      ))}
+                      {perfil.servicios.map(
+                        (servicio) => (
+                          <span
+                            key={servicio}
+                            className="perfil-tag"
+                          >
+                            {servicio}
+                          </span>
+                        )
+                      )}
                     </div>
                   </div>
 
@@ -212,7 +304,9 @@ function Perfil() {
                       </span>
 
                       <strong>
-                        {serviciosPerfil.length}
+                        {
+                          serviciosPerfil.length
+                        }
                       </strong>
                     </div>
 
@@ -267,29 +361,50 @@ function Perfil() {
                 )}
               </div>
 
-              {serviciosPerfil.length > 0 ? (
-                <div className="perfil-servicios-grid">
-                  {serviciosPerfil.map((servicio) => (
-                    <TarjetaServicio
-                      key={servicio.id}
-                      servicio={servicio}
-                      puedeEditar={esPropietaria}
-                      onEliminar={
-                        esPropietaria
-                          ? manejarEliminar
-                          : undefined
-                      }
-                    />
-                  ))}
+              {error && (
+                <div className="sin-servicios">
+                  <p>{error}</p>
                 </div>
-              ) : (
+              )}
+
+              {cargando ? (
                 <div className="sin-servicios">
                   <p>
-                    {esPropietaria
-                      ? "Todavía no tienes servicios publicados."
-                      : "Este perfil todavía no tiene servicios disponibles."}
+                    Cargando servicios...
                   </p>
                 </div>
+              ) : serviciosPerfil.length >
+                0 ? (
+                <div className="perfil-servicios-grid">
+                  {serviciosPerfil.map(
+                    (servicio) => (
+                      <TarjetaServicio
+                        key={servicio.id}
+                        servicio={
+                          servicio
+                        }
+                        puedeEditar={
+                          esPropietaria
+                        }
+                        onEliminar={
+                          esPropietaria
+                            ? manejarEliminar
+                            : undefined
+                        }
+                      />
+                    )
+                  )}
+                </div>
+              ) : (
+                !error && (
+                  <div className="sin-servicios">
+                    <p>
+                      {esPropietaria
+                        ? "Todavía no tienes servicios publicados."
+                        : "Este perfil todavía no tiene servicios disponibles."}
+                    </p>
+                  </div>
+                )
               )}
 
             </section>
