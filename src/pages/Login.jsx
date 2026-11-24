@@ -14,15 +14,16 @@ function Login() {
   const [indiceActual, setIndiceActual] = useState(0);
 
   const {
-        rol,
-        setRol,
-        correo,
-        setCorreo,
-        contrasena,
-        setContrasena,
-        error,
-        manejarLogin,
-      } = useLogin();
+    rol,
+    setRol,
+    correo,
+    setCorreo,
+    contrasena,
+    setContrasena,
+    error,
+    cargando,
+    manejarLogin,
+  } = useLogin();
 
   const banners = [
     {
@@ -38,10 +39,10 @@ function Login() {
         "Explora PrivéLink y descubre experiencias para distintas ocasiones.",
     },
     {
-    imagen: bannerChica3,
-    titulo:"Haz de cada ocasión una experiencia especial" ,
-    texto:
-    "Descubre perfiles ideales para acompañarte en cenas, reuniones y momentos que merecen una presencia única"
+      imagen: bannerChica3,
+      titulo: "Haz de cada ocasión una experiencia especial",
+      texto:
+        "Descubre perfiles ideales para acompañarte en cenas, reuniones y momentos que merecen una presencia única",
     },
   ];
 
@@ -78,7 +79,10 @@ function Login() {
                 index === indiceActual ? "login-slide-activo" : ""
               }`}
             >
-              <img src={banner.imagen} alt={banner.titulo} />
+              <img
+                src={banner.imagen}
+                alt={banner.titulo}
+              />
 
               <div className="login-overlay"></div>
 
@@ -127,7 +131,9 @@ function Login() {
 
         <div className="login-panel">
           <div className="login-panel-contenido">
-            <p className="login-etiqueta">BIENVENIDO A PRIVÉLINK</p>
+            <p className="login-etiqueta">
+              BIENVENIDO A PRIVÉLINK
+            </p>
 
             <h2>Iniciar sesión</h2>
 
@@ -138,8 +144,13 @@ function Login() {
             <div className="login-roles">
               <button
                 type="button"
-                className={rol === "cliente" ? "rol-activo" : ""}
+                className={
+                  rol === "cliente"
+                    ? "rol-activo"
+                    : ""
+                }
                 onClick={() => setRol("cliente")}
+                disabled={cargando}
               >
                 <span>👤</span>
                 Cliente
@@ -147,8 +158,15 @@ function Login() {
 
               <button
                 type="button"
-                className={rol === "colaborador" ? "rol-activo" : ""}
-                onClick={() => setRol("colaborador")}
+                className={
+                  rol === "colaborador"
+                    ? "rol-activo"
+                    : ""
+                }
+                onClick={() =>
+                  setRol("colaborador")
+                }
+                disabled={cargando}
               >
                 <span>★</span>
                 Colaborador
@@ -156,43 +174,79 @@ function Login() {
 
               <button
                 type="button"
-                className={rol === "administrador" ? "rol-activo" : ""}
-                onClick={() => setRol("administrador")}
+                className={
+                  rol === "administrador"
+                    ? "rol-activo"
+                    : ""
+                }
+                onClick={() =>
+                  setRol("administrador")
+                }
+                disabled={cargando}
               >
                 <span>⚙</span>
                 Administrador
               </button>
             </div>
 
-            <form className="login-formulario" onSubmit={manejarLogin}>
+            <form
+              className="login-formulario"
+              onSubmit={manejarLogin}
+            >
               <div className="login-campo">
-                <label htmlFor="correo">Correo electrónico</label>
+                <label htmlFor="correo">
+                  Correo electrónico
+                </label>
 
                 <input
                   id="correo"
                   type="email"
                   placeholder="correo@ejemplo.cl"
                   value={correo}
-                  onChange={(evento) => setCorreo(evento.target.value)}
+                  onChange={(evento) =>
+                    setCorreo(
+                      evento.target.value
+                    )
+                  }
+                  disabled={cargando}
+                  required
                 />
               </div>
 
               <div className="login-campo">
-                <label htmlFor="contrasena">Contraseña</label>
+                <label htmlFor="contrasena">
+                  Contraseña
+                </label>
 
                 <input
                   id="contrasena"
                   type="password"
                   placeholder="Ingresa tu contraseña"
                   value={contrasena}
-                  onChange={(evento) => setContrasena(evento.target.value)}
+                  onChange={(evento) =>
+                    setContrasena(
+                      evento.target.value
+                    )
+                  }
+                  disabled={cargando}
+                  required
                 />
               </div>
 
-              {error && <p className="login-error">{error}</p>}
+              {error && (
+                <p className="login-error">
+                  {error}
+                </p>
+              )}
 
-              <button type="submit" className="login-boton">
-                Ingresar
+              <button
+                type="submit"
+                className="login-boton"
+                disabled={cargando}
+              >
+                {cargando
+                  ? "Ingresando..."
+                  : "Ingresar"}
               </button>
             </form>
 
@@ -209,7 +263,12 @@ function Login() {
             <button
               type="button"
               className="login-boton-registro"
-              onClick={() => navigate("/registro-colaborador")}
+              onClick={() =>
+                navigate(
+                  "/registro-colaborador"
+                )
+              }
+              disabled={cargando}
             >
               Crear perfil de colaborador
             </button>

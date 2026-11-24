@@ -1,44 +1,48 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// =========================================================
-// CUENTAS DE PRUEBA
-// =========================================================
-// Estos datos son públicos dentro del frontend.
-// Nunca utilizar contraseñas reales aquí.
-
-const cuentasDemo = [
-  {
-    id: 1,
-    correo: "admin@privelink.cl",
-    clave: "Admin123",
-    rol: "administrador",
-  },
-  {
-    id: 2,
-    correo: "colaborador@privelink.cl",
-    clave: "Colab123",
-    rol: "colaborador",
-
-    // Perfil que pertenece a esta colaboradora
-    perfilId: 1,
-  },
-  {
-    id: 3,
-    correo: "cliente@gmail.com",
-    clave: "Cliente123",
-    rol: "cliente",
-  },
-];
+const API_URL = "http://localhost:8080";
 
 // =========================================================
 // RUTAS SEGÚN ROL
 // =========================================================
 
 const rutasPorRol = {
-  administrador: "/inicio-admin",
-  cliente: "/feed",
+  ADMIN: "/inicio-admin",
+  CLIENTE: "/feed",
 };
+
+// =========================================================
+// CONVERSIÓN DE ROLES
+// =========================================================
+
+const rolFrontendPorBackend = {
+  ADMIN: "administrador",
+  CLIENTE: "cliente",
+  COLABORADOR: "colaborador",
+};
+
+const rolBackendPorFrontend = {
+  administrador: "ADMIN",
+  cliente: "CLIENTE",
+  colaborador: "COLABORADOR",
+};
+
+// =========================================================
+// PERFILES LOCALES DE COLABORADORES
+// =========================================================
+
+function obtenerPerfilesColaborador() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(
+        "privelink_perfiles_colaborador"
+      ) || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
 
 // =========================================================
 // HOOK LOGIN
@@ -47,12 +51,30 @@ const rutasPorRol = {
 export function useLogin() {
   const navigate = useNavigate();
 
-  const [rol, setRol] = useState("cliente");
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState("");
+  const [rol, setRol] =
+    useState("cliente");
 
-  const manejarLogin = (evento) => {
+  const [correo, setCorreo] =
+    useState("");
+
+  const [
+    contrasena,
+    setContrasena,
+  ] = useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [cargando, setCargando] =
+    useState(false);
+
+  // =======================================================
+  // INICIAR SESIÓN
+  // =======================================================
+
+  const manejarLogin = async (
+    evento
+  ) => {
     evento.preventDefault();
 
     setError("");
@@ -60,11 +82,10 @@ export function useLogin() {
     const correoNormalizado =
       correo.trim().toLowerCase();
 
-    // =====================================================
-    // VALIDAR CAMPOS
-    // =====================================================
-
-    if (!correoNormalizado || !contrasena) {
+    if (
+      !correoNormalizado ||
+      !contrasena.trim()
+    ) {
       setError(
         "Ingresa tu correo y contraseña."
       );
@@ -72,125 +93,228 @@ export function useLogin() {
       return;
     }
 
-    // =====================================================
-    // USUARIOS REGISTRADOS
-    // =====================================================
+    try {
+      setCargando(true);
 
-    const usuariosGuardados = JSON.parse(
-      localStorage.getItem(
-        "privelink_usuarios"
-      ) || "[]"
-    );
+      // ===================================================
+      // LOGIN REAL CONTRA SPRING BOOT
+      // ===================================================
 
-    // Cuentas demo + usuarios registrados
+      const respuesta = await fetch(
+        `${API_URL}/api/auth/login`,
+        {
+          method: "POST",
 
-    const todasLasCuentas = [
-      ...cuentasDemo,
-      ...usuariosGuardados,
-    ];
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-    // =====================================================
-    // BUSCAR USUARIO
-    // =====================================================
-
-    const usuario = todasLasCuentas.find(
-      (cuenta) =>
-        cuenta.correo?.toLowerCase() ===
-          correoNormalizado &&
-        cuenta.clave === contrasena
-    );
-
-    if (!usuario) {
-      setError(
-        "Correo o contraseña incorrectos."
+          body: JSON.stringify({
+            correo:
+              correoNormalizado,
+            password:
+              contrasena,
+          }),
+        }
       );
 
-      return;
-    }
+      let datos = {};
 
-    // =====================================================
-    // COMPROBAR ROL SELECCIONADO
-    // =====================================================
+      try {
+        datos =
+          await respuesta.json();
+      } catch {
+        datos = {};
+      }
 
-    if (usuario.rol !== rol) {
-      setError(
-        "Esta cuenta no corresponde al tipo de usuario seleccionado."
-      );
+      // ===================================================
+      // ERROR DEL BACKEND
+      // ===================================================
 
-      return;
-    }
+      if (!respuesta.ok) {
+        throw new Error(
+          datos.mensaje ||
+            "Correo o contraseña incorrectos."
+        );
+      }
 
-    // =====================================================
-    // PERFIL DE LA COLABORADORA
-    // =====================================================
+      // ===================================================
+      // VALIDAR RESPUESTA
+      // ===================================================
 
-    const perfilId =
-      usuario.rol === "colaborador"
-        ? usuario.perfilId || 1
-        : null;
+      if (
+        !datos.id ||
+        !datos.rol ||
+        !datos.token
+      ) {
+        throw new Error(
+          "La respuesta del servidor no contiene una sesión válida."
+        );
+      }
 
-    // =====================================================
-    // GUARDAR SESIÓN
-    // =====================================================
-    // Nunca guardamos la contraseña.
+      // ===================================================
+      // VALIDAR ROL SELECCIONADO
+      // ===================================================
 
-    const sesion = {
-      id: usuario.id,
-      correo: usuario.correo,
-      rol: usuario.rol,
-      perfilId,
-    };
+      const rolEsperadoBackend =
+        rolBackendPorFrontend[rol];
 
-    localStorage.setItem(
-      "privelink_sesion",
-      JSON.stringify(sesion)
-    );
+      if (
+        rolEsperadoBackend !==
+        datos.rol
+      ) {
+        const nombreRol =
+          rolFrontendPorBackend[
+            datos.rol
+          ] || datos.rol;
 
-    /*
-     * Estas claves permiten que Perfil.jsx
-     * y Navbar.jsx sepan qué permisos mostrar.
-     */
+        setError(
+          `Esta cuenta corresponde al rol ${nombreRol}.`
+        );
 
-    localStorage.setItem(
-      "rol_usuario",
-      usuario.rol
-    );
+        return;
+      }
 
-    if (
-      usuario.rol === "colaborador" &&
-      perfilId
-    ) {
+      const rolFrontend =
+        rolFrontendPorBackend[
+          datos.rol
+        ];
+
+      // ===================================================
+      // BUSCAR PERFIL DEL COLABORADOR
+      // ===================================================
+
+      let perfilId = null;
+
+      if (
+        datos.rol ===
+        "COLABORADOR"
+      ) {
+        const perfiles =
+          obtenerPerfilesColaborador();
+
+        const perfilUsuario =
+          perfiles.find(
+            (perfil) =>
+              perfil.usuarioId ===
+                datos.id ||
+              perfil.correo?.toLowerCase() ===
+                datos.correo?.toLowerCase()
+          );
+
+        /*
+         * Si es un colaborador antiguo
+         * que no tiene perfil local,
+         * mantenemos perfil 1 como fallback.
+         */
+        perfilId =
+          perfilUsuario?.id || 1;
+      }
+
+      // ===================================================
+      // GUARDAR SESIÓN
+      // ===================================================
+
+      const sesion = {
+        id: datos.id,
+        nombre: datos.nombre,
+        correo: datos.correo,
+
+        rol:
+          rolFrontend,
+
+        rolBackend:
+          datos.rol,
+
+        perfilId,
+
+        token:
+          datos.token,
+      };
+
       localStorage.setItem(
-        "perfil_usuario_id",
-        String(perfilId)
+        "privelink_sesion",
+        JSON.stringify(sesion)
       );
-    } else {
-      localStorage.removeItem(
-        "perfil_usuario_id"
+
+      localStorage.setItem(
+        "privelink_token",
+        datos.token
       );
-    }
 
-    // =====================================================
-    // REDIRECCIÓN
-    // =====================================================
+      localStorage.setItem(
+        "rol_usuario",
+        rolFrontend
+      );
 
-    if (usuario.rol === "colaborador") {
+      // ===================================================
+      // PERFIL DEL COLABORADOR
+      // ===================================================
+
+      if (
+        rolFrontend ===
+          "colaborador" &&
+        perfilId
+      ) {
+        localStorage.setItem(
+          "perfil_usuario_id",
+          String(perfilId)
+        );
+      } else {
+        localStorage.removeItem(
+          "perfil_usuario_id"
+        );
+      }
+
+      // ===================================================
+      // REDIRECCIÓN
+      // ===================================================
+
+      if (
+        datos.rol ===
+        "COLABORADOR"
+      ) {
+        navigate(
+          `/perfil/${perfilId}`,
+          {
+            replace: true,
+          }
+        );
+
+        return;
+      }
+
+      const rutaDestino =
+        rutasPorRol[
+          datos.rol
+        ];
+
+      if (!rutaDestino) {
+        throw new Error(
+          "No existe una ruta configurada para este rol."
+        );
+      }
+
       navigate(
-        `/perfil/${perfilId}`,
+        rutaDestino,
         {
           replace: true,
         }
       );
+    } catch (errorLogin) {
+      console.error(
+        "Error al iniciar sesión:",
+        errorLogin
+      );
 
-      return;
+      setError(
+        errorLogin.message ||
+          "No fue posible iniciar sesión."
+      );
+    } finally {
+      setCargando(false);
     }
-
-    navigate(
-      rutasPorRol[usuario.rol],
-      {
-        replace: true,
-      }
-    );
   };
 
   // =======================================================
@@ -200,6 +324,10 @@ export function useLogin() {
   const cerrarSesion = () => {
     localStorage.removeItem(
       "privelink_sesion"
+    );
+
+    localStorage.removeItem(
+      "privelink_token"
     );
 
     localStorage.removeItem(
@@ -221,12 +349,19 @@ export function useLogin() {
   return {
     rol,
     setRol,
+
     correo,
     setCorreo,
+
     contrasena,
     setContrasena,
+
     error,
+
+    cargando,
+
     manejarLogin,
+
     cerrarSesion,
   };
 }
